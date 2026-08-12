@@ -197,7 +197,30 @@
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 <script> lucide.createIcons(); </script>
+
 <script>
+    $("#originSelect").one("click",function (){
+        let $select = $("#originSelect");
+
+        $.ajax({
+            type: "get",
+            url: "/country/list",
+            success: function (response) {
+
+                response.forEach(function (country) {
+                    $select.append(
+                        $("<option>", {
+                            value: country.countryCode,
+                            text: country.countryNameKo + " (" + country.countryNameEn + ")"
+                        })
+                    );
+                });
+            },
+            error: function () {
+                console.error("국가 목록을 불러오지 못했습니다.");
+            }
+        });
+    });
     $("#signupBtn").on("click",function(){
         let name = $("#nameInput").val();
         let nickName = $("#nickNameInput").val();
