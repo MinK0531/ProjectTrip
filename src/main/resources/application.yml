@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: ProjectTrip
+
+  config:
+    import: security-variable.yml
+
+  thymeleaf:
+    cache: false
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url:  jdbc:mysql://localhost:3306/projecttrip?serverTimezone=Asia/Seoul
+    username: root
+    password: ${mysql.password}
+
+
+mybatis:
+  mapper-locations: classpath:/mappers/*Mapper.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+opencage:
+  api-key: ${OPENCAGE_API_KEY}
