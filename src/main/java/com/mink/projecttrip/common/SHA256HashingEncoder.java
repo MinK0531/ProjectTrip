@@ -1,4 +1,4 @@
-package com.mink.projecttrrip.common;
+package com.mink.projecttrip.common;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

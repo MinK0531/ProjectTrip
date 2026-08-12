@@ -1,6 +1,6 @@
-package com.mink.projecttrrip.user.repository;
+package com.mink.projecttrip.user.repository;
 
-import com.mink.projecttrrip.user.domain.User;
+import com.mink.projecttrip.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

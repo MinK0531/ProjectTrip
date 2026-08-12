@@ -1,4 +1,4 @@
-package com.mink.projecttrrip.common.dto;
+package com.mink.projecttrip.common.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

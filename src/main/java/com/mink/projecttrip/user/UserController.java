@@ -1,4 +1,4 @@
-package com.mink.projecttrrip.user;
+package com.mink.projecttrip.user;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

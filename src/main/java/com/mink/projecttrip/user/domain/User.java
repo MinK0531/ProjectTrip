@@ -1,4 +1,4 @@
-package com.mink.projecttrrip.user.domain;
+package com.mink.projecttrip.user.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

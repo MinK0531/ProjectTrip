@@ -1,10 +1,10 @@
-package com.mink.projecttrrip;
+package com.mink.projecttrip;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class ProjectTrripApplicationTests {
+class ProjectTripApplicationTests {
 
     @Test
     void contextLoads() {

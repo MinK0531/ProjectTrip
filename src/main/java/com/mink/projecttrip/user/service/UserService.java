@@ -1,8 +1,8 @@
-package com.mink.projecttrrip.user.service;
+package com.mink.projecttrip.user.service;
 
-import com.mink.projecttrrip.common.SHA256HashingEncoder;
-import com.mink.projecttrrip.user.domain.User;
-import com.mink.projecttrrip.user.repository.UserRepository;
+import com.mink.projecttrip.common.SHA256HashingEncoder;
+import com.mink.projecttrip.user.domain.User;
+import com.mink.projecttrip.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;

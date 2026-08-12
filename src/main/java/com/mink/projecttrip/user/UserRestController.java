@@ -1,8 +1,7 @@
-package com.mink.projecttrrip.user;
+package com.mink.projecttrip.user;
 
-import com.mink.projecttrrip.common.dto.ApiResponse;
-import com.mink.projecttrrip.user.repository.UserRepository;
-import com.mink.projecttrrip.user.service.UserService;
+import com.mink.projecttrip.common.dto.ApiResponse;
+import com.mink.projecttrip.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
