@@ -15,6 +15,7 @@ import java.util.List;
 public class CountryRestController {
 
     private final CountryService countryService;
+
     @GetMapping("/list")
     public List<Country> getCountryList(){
         return countryService.getCountryList();

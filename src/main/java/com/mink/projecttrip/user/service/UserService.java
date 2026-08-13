@@ -36,4 +36,12 @@ public class UserService {
         }
         return true;
     }
+
+    public boolean isDuplicateNickName(String nickName){
+        return userRepository.existsByNickName(nickName);
+    }
+
+    public boolean isDuplicateEmail(String email){
+        return userRepository.existsByEmail(email);
+    }
 }
