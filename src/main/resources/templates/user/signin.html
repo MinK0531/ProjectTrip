@@ -95,7 +95,54 @@
 <script src="https://unpkg.com/lucide@latest"></script>
 <script> lucide.createIcons(); </script>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script>
+    function isValidEmail(email) {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    }
 
+    $("#emailInput").on("input",function (){
+       let email = $("#emailInput").val();
+
+       $("#emailInvalidText").addClass("d-none");
+
+        if (!isValidEmail(email)) {
+            $("#emailInvalidText").removeClass("d-none");
+            return;
+        }
+    });
+
+    $("#signinBtn").on("click",function(){
+        let email = $("#emailInput").val();
+        let password = $("#passwordInput").val();
+
+        if(email == ""){
+            alert("이메일을 입력하세요");
+            return;
+        }
+
+        if(password == ""){
+            alert("비밀번호를 입력하세요");
+            return;
+        }
+
+        $.ajax({
+            type: "post",
+            url: "/user/signin-process",
+            data: {email: email, password: password},
+            success: function (response){
+                if(response.result == "success"){
+                    location.href = "/home/timeline";
+                }else{
+                    alert("이메일과 비밀번호를 확인해 주세요.");
+                }
+            },
+            error: function (){
+                alert("로그인 에러");
+            }
+        })
+    });
+</script>
 
 </body>
 </html>

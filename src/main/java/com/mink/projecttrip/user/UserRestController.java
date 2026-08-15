@@ -1,7 +1,10 @@
 package com.mink.projecttrip.user;
 
 import com.mink.projecttrip.common.dto.ApiResponse;
+import com.mink.projecttrip.user.domain.User;
 import com.mink.projecttrip.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,5 +51,24 @@ public class UserRestController {
         }
     }
 
+    @PostMapping("/signin-process")
+    public ApiResponse<Void> signin(
+            @RequestParam String email,
+            @RequestParam String password,
+            HttpServletRequest request) {
+
+        User user = userService.getUser(email, password);
+
+        if (user == null) {
+            return ApiResponse.fail("로그인 실패");
+        } else {
+            HttpSession session = request.getSession();
+            session.setAttribute("userId", user.getId());
+            session.setAttribute("userNickName", user.getNickName());
+
+            return ApiResponse.success("로그인 성공");
+
+        }
+    }
 
 }

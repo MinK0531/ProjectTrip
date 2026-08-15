@@ -44,4 +44,8 @@ public class UserService {
     public boolean isDuplicateEmail(String email){
         return userRepository.existsByEmail(email);
     }
+    public User getUser(String email, String password){
+        String encodePassword = SHA256HashingEncoder.encode(password);
+        return userRepository.findByEmailAndPassword(email, encodePassword);
+    }
 }
