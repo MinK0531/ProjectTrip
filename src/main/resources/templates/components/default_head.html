@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CHECK-IN</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<body class="bg-gray-50">
+
+<nav class="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-50">
+    <div class="max-w-7xl mx-auto px-4">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center gap-2 cursor-pointer">
+                <i data-lucide="map" class="w-8 h-8 text-blue-600"></i>
+                <span class="text-xl font-bold">CHECK-IN</span>
+            </div>
+
+            <div class="flex items-center gap-1">
+                <a href="/home/timeline" class="nav-item flex flex-col items-center gap-1 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="home" class="w-6 h-6"></i>
+                    <span class="text-xs hidden md:block">홈</span>
+                </a>
+                <a href="/search/timeline" class="nav-item flex flex-col items-center gap-1 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="search" class="w-6 h-6"></i>
+                    <span class="text-xs hidden md:block">검색</span>
+                </a>
+                <button class="flex flex-col items-center gap-1 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+                    <i data-lucide="message-circle" class="w-6 h-6"></i>
+                    <span class="text-xs hidden md:block">메시지</span>
+                </button>
+                <a href="/alarm/timeline" class="nav-item flex flex-col items-center gap-1 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
+                    <i data-lucide="bell" class="w-6 h-6"></i>
+                    <span class="text-xs hidden md:block">알람</span>
+                </a>
+                <button data-toggle="modal" data-target="#createChoiceModal" class="flex flex-col items-center gap-1 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+                    <i data-lucide="plus-square" class="w-6 h-6"></i>
+                    <span class="text-xs hidden md:block">만들기</span>
+                </button>
+
+                <a href="/mypage/map" class="ml-4 flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full flex items-center justify-center text-white border-2  cursor-pointer">
+                        <img id="navProfileImg"
+                             th:src="${session.userProfileImg != null ? session.userProfileImg : '/img/profile.png'}"
+                             class="profile-pic profile-sty">
+                    </div>
+                </a>
+
+                <div th:if="${session.userId != null}">
+                    <a href="/user/signout" class="flex flex-col items-center gap-1 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100">
+                        <i data-lucide="log-out" class="w-6 h-6"></i>
+                        <span class="text-xs hidden md:block">logout</span>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</nav>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+
+
+<th:block layout:fragment="content"></th:block>
+<th:block layout:fragment="script"></th:block>
+
+<script>lucide.createIcons();</script>
+
+</body>
+</html>
