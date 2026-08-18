@@ -67,15 +67,342 @@
     </div>
 </nav>
 
+<!-- 만들기 선택 모달 -->
+<div class="modal fade" id="createChoiceModal" tabindex="-1" role="dialog"
+     aria-labelledby="createChoiceModalLabel" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="createChoiceModalLabel">만들기</h5>
+
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <button type="button"
+                        class="btn btn-light border w-100 mb-3 py-3 text-left"
+                        data-dismiss="modal"
+                        data-toggle="modal"
+                        data-target="#postCreateModal">
+
+                    <div class="d-flex align-items-center">
+                        <i data-lucide="image" class="mr-3"></i>
+
+                        <div>
+                            <div class="font-weight-bold">
+                                게시물 만들기
+                            </div>
+                            <small class="text-muted">
+                                여행 사진과 게시물을 공유해보세요.
+                            </small>
+                        </div>
+                    </div>
+                </button>
+
+
+                <button type="button"
+                        class="btn btn-light border w-100 py-3 text-left"
+                        data-dismiss="modal"
+                        data-toggle="modal"
+                        data-target="#wishlistCreateModal">
+
+                    <div class="d-flex align-items-center">
+                        <i data-lucide="heart" class="mr-3"></i>
+
+                        <div>
+                            <div class="font-weight-bold">
+                                위시리스트 만들기
+                            </div>
+                            <small class="text-muted">
+                                가고 싶은 여행지를 저장해보세요.
+                            </small>
+                        </div>
+                    </div>
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade"
+     id="postCreateModal"
+     tabindex="-1"
+     role="dialog"
+     aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered post-modal-dialog"
+         role="document">
+
+        <div class="modal-content post-modal-content">
+
+            <div class="ticket-wrapper">
+
+                <div class="ticket-main">
+
+                    <div class="ticket-container">
+
+                        <!-- 이미지 업로드 -->
+                        <div class="ticket-left-upload">
+
+                            <div class="new-post-header">
+
+                                <div class="ticket-plane-icon">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5v1.5l3.5-1 3.5 1V20.5L13 19v-5.5l8 2.5z"/>
+                                    </svg>
+                                </div>
+
+                                <span class="new-post-text">
+                                    NEW POST
+                                </span>
+
+                            </div>
+
+
+                            <div class="upload-main-content"
+                                 id="drop-zone">
+
+                                <input type="file"
+                                       id="image-input"
+                                       class="d-none"
+                                       multiple>
+
+                                <div id="upload-placeholder">
+
+                                    <i data-lucide="image"
+                                       class="image-upload-icon"></i>
+
+                                    <p class="upload-text">
+                                        사진을 여기에 끌어다 놓으세요
+                                    </p>
+
+                                    <button type="button"
+                                            class="btn btn-instagram-style"
+                                            id="selectImageBtn">
+                                        컴퓨터에서 선택
+                                    </button>
+
+                                </div>
+
+
+                                <div id="swiper-wrapper-box"
+                                     class="d-none">
+
+                                    <div class="swiper post-swiper">
+
+                                        <div class="swiper-wrapper"
+                                             id="imagePreviewWrapper">
+                                        </div>
+
+                                        <div class="swiper-pagination"></div>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- 가운데 -->
+                        <div class="ticket-center-input">
+
+                            <div class="top-stripe-head">
+                                <img src="/img/top-stripe.png"
+                                     alt="top-stripe">
+                            </div>
+
+
+                            <label class="ticket-label ">
+                                내용
+                            </label>
+
+                            <textarea id="contentsInput"
+                                      class="ticket-input"
+                                      rows="4"
+                                      maxlength="1000"
+                                      placeholder="여행의 기록을 남겨보세요 (0/1000)"></textarea>
+
+
+                            <label class="ticket-label">
+                                여행한 나라
+                            </label>
+
+                            <select id="countrySelect"
+                                    class="ticket-input">
+
+                                <option value=""
+                                        disabled
+                                        selected>
+                                    나라를 선택하세요
+                                </option>
+
+                            </select>
+
+
+                            <label class="ticket-label">
+                                음악
+                            </label>
+
+                            <input type="text"
+                                   id="musicInput"
+                                   class="ticket-input"
+                                   placeholder="추억의 음악을 찾아보세요">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- 오른쪽 티켓 절취선 -->
+                <div class="ticket-stub">
+
+                    <button type="button"
+                            class="close-ticket"
+                            data-dismiss="modal">
+                        &times;
+                    </button>
+
+
+                    <p class="stub-title">
+                        추천하는 장소
+                        <small>(선택)</small>
+                    </p>
+
+
+                    <label class="ticket-label">
+                        여행한 도시
+                    </label>
+
+                    <select id="cityNameSelect"
+                            class="ticket-input"
+                            disabled>
+
+                        <option value=""
+                                disabled
+                                selected>
+                            도시명
+                        </option>
+
+                    </select>
+
+
+                    <label class="ticket-label">
+                        가게 이름
+                    </label>
+
+                    <input type="text"
+                           id="placeNameInput"
+                           class="ticket-input"
+                           placeholder="맛집 / 명소">
+
+
+                    <label class="ticket-label">
+                        분위기
+                    </label>
+
+                    <input type="text"
+                           id="placeMoodInput"
+                           class="ticket-input"
+                           placeholder="평화로운, 힙한 등">
+
+
+                    <button type="button"
+                            class="btn-upload-blue"
+                            id="uploadBtn">
+                        POST NOW
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <input type="hidden"
+           id="latitude"
+           value="0.0">
+
+    <input type="hidden"
+           id="longitude"
+           value="0.0">
+
+</div>
+
+<div class="modal fade" id="wishlistCreateModal" tabindex="-1" role="dialog"
+     aria-labelledby="wishlistCreateModalLabel" aria-hidden="true">
+
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="wishlistCreateModalLabel">
+                    위시리스트 만들기
+                </h5>
+
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <!-- 여기에 위시리스트 작성 UI -->
+                <div class="text-center py-4">
+                    <i data-lucide="heart" class="mb-3"
+                       style="width:48px;height:48px;"></i>
+
+                    <h5>가고 싶은 곳을 저장해보세요</h5>
+
+                    <p class="text-muted">
+                        여행하고 싶은 장소를 위시리스트에 추가하세요.
+                    </p>
+                </div>
+
+                <button type="button"
+                        class="btn btn-primary btn-block"
+                        onclick="openWishlistWrite()">
+                    위시리스트 작성하기
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <th:block layout:fragment="content"></th:block>
 <th:block layout:fragment="script"></th:block>
 
 <script>lucide.createIcons();</script>
 
+<script>
+    function openPostWrite() {
+
+        console.log("게시물 작성");
+    }
+
+    function openWishlistWrite() {
+
+        console.log("위시리스트 작성");
+    }
+
+    lucide.createIcons();
+</script>
 </body>
 </html>
