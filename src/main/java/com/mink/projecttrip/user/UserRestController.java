@@ -65,6 +65,7 @@ public class UserRestController {
             HttpSession session = request.getSession();
             session.setAttribute("userId", user.getId());
             session.setAttribute("userNickName", user.getNickName());
+            session.setAttribute("userCountryCode", user.getCountryCode());
 
             return ApiResponse.success("로그인 성공");
 
