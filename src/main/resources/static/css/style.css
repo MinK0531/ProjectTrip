@@ -126,15 +126,6 @@ main {
     font-family: 'Arial', sans-serif;
 }
 
-.top-stripe {
-    height: 26px;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-}
-
 .pass-content { padding: 20px; }
 
 .top-section {
@@ -275,6 +266,7 @@ main {
 /*Create Choice Modal (게시물/위시리스트 선택) */
 .modal-content { position: relative; }
 
+
 .close-ticket {
     background: none;
     border: none;
@@ -285,8 +277,8 @@ main {
     padding: 0;
     margin-bottom: 5px;
     transition: color 0.2s;
-}
 
+}
 .create-choice-modal .modal-dialog {
     width: 300px !important;
     max-width: 300px !important;
@@ -446,7 +438,11 @@ main {
     font-size: 13px;
 }
 
-.ticket-center-input { flex: 1.5; }
+.ticket-center-input {
+    flex: 1.5;
+    padding-right: 20px;
+    box-sizing: border-box;
+}
 
 .ticket-label {
     display: block;
@@ -1188,14 +1184,7 @@ main {
 }
 
 
-/*
 
-
-
-
-
-
-*/
 
 .wishlist-list-panel{
     position: absolute;
