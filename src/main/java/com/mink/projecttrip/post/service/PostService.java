@@ -2,11 +2,18 @@ package com.mink.projecttrip.post.service;
 
 import com.mink.projecttrip.city.service.CityService;
 import com.mink.projecttrip.common.FileManager;
+import com.mink.projecttrip.country.domain.Country;
+import com.mink.projecttrip.country.repository.CountryRepository;
 import com.mink.projecttrip.post.domain.Post;
 import com.mink.projecttrip.post.domain.PostImage;
+import com.mink.projecttrip.post.dto.PostDetail;
+import com.mink.projecttrip.post.dto.PostImageDetail;
 import com.mink.projecttrip.post.repository.PostImageRepository;
 import com.mink.projecttrip.post.repository.PostRepository;
+import com.mink.projecttrip.user.domain.User;
+import com.mink.projecttrip.user.service.UserService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,6 +28,8 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostImageRepository postImageRepository;
     private final CityService cityService;
+    private final UserService userService;
+    private final CountryRepository countryRepository;
 
     @Transactional
     public boolean createPost(long userId,
@@ -80,5 +89,55 @@ public class PostService {
         }
 
         return true;
+    }
+    @Transactional(readOnly = true)
+    public List<PostDetail> getFeedList() {
+
+        List<Post> postList = postRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+
+        List<PostDetail> feedList = new ArrayList<>();
+
+        for (Post post : postList) {
+
+            User user = userService.getUserById(post.getUserId());
+
+
+            List<PostImage> images = postImageRepository
+                    .findAllByPostIdOrderBySortOrderAsc(
+                            post.getId()
+                    );
+
+            List<PostImageDetail> imageList = images.stream()
+                    .map(image ->
+                            PostImageDetail.builder()
+                                    .id(image.getId())
+                                    .imagePath(image.getImagePath())
+                                    .sortOrder(image.getSortOrder())
+                                    .build())
+                    .toList();
+            String countryName = countryRepository.findById(post.getCountryId())
+                    .map(Country::getCountryNameKo)
+                    .orElse("알 수 없는 나라");
+
+            PostDetail postDetail = PostDetail.builder()
+                    .id(post.getId())
+                    .userId(post.getUserId())
+                    .countryId(post.getCountryId())
+                    .nickName(user.getNickName())
+                    .countryName(countryName)
+                    .cityName(post.getCityName())
+                    .contents(post.getContents())
+                    .atmosphere(post.getAtmosphere())
+                    .placeName(post.getPlaceName())
+                    .musicUrl(post.getMusicUrl())
+                    .latitude(post.getLatitude())
+                    .longitude(post.getLongitude())
+                    .createdAt(post.getCreatedAt())
+                    .imageList(imageList)
+                    .build();
+            feedList.add(postDetail);
+        }
+
+        return feedList;
     }
 }

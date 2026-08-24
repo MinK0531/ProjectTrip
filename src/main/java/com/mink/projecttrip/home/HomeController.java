@@ -1,5 +1,6 @@
 package com.mink.projecttrip.home;
 
+import com.mink.projecttrip.post.service.PostService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/home")
 public class HomeController {
 
+    private final PostService postService;
+
     @GetMapping("/timeline")
     public String timeline(Model model, HttpSession session) {
         Long userId = (Long) session.getAttribute("userId");
@@ -19,6 +22,7 @@ public class HomeController {
         if (userId == null) {
             return "redirect:/user/signin";
         }
+        model.addAttribute("feedList", postService.getFeedList());
 
         return "home/timeline";
     }

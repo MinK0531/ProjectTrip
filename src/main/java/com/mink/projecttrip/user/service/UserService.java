@@ -48,4 +48,8 @@ public class UserService {
         String encodePassword = SHA256HashingEncoder.encode(password);
         return userRepository.findByEmailAndPassword(email, encodePassword);
     }
+    public User getUserById(long id){
+        return userRepository.findById(id).orElse(null);
+    }
+
 }

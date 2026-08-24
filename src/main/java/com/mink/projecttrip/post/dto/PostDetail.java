@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -23,7 +24,7 @@ public class PostDetail {
     private String musicUrl;
     private double latitude;
     private double longitude;
-
+    private LocalDateTime createdAt;
     private List<PostImageDetail> imageList;
 
     private int likeCount;
