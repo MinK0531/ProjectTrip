@@ -1,5 +1,8 @@
 package com.mink.projecttrip.wishlist.service;
 
+import com.mink.projecttrip.city.service.CityService;
+import com.mink.projecttrip.country.domain.Country;
+import com.mink.projecttrip.country.repository.CountryRepository;
 import com.mink.projecttrip.wishlist.domain.Wishlist;
 import com.mink.projecttrip.wishlist.repository.WishlistRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +16,7 @@ import java.time.LocalDate;
 public class WishlistService {
 
     private final WishlistRepository wishlistRepository;
+    private final CityService cityService;
 
     public boolean createWishlist(
             long userId,
@@ -21,10 +25,11 @@ public class WishlistService {
             String period,
             String startDate,
             String endDate,
-            String memo,
-            double latitude,
-            double longitude
+            String memo
     ) {
+        double[] coordinate =
+                cityService.getCoordinate(countryId, cityName);
+
         Wishlist wishlist = Wishlist.builder()
                 .userId(userId)
                 .countryId(countryId)
@@ -33,8 +38,8 @@ public class WishlistService {
                 .startDate(startDate == null || startDate.isBlank() ? null : LocalDate.parse(startDate))
                 .endDate(endDate == null || endDate.isBlank() ? null : LocalDate.parse(endDate))
                 .memo(memo)
-                .latitude(latitude)
-                .longitude(longitude)
+                .latitude(coordinate[0])
+                .longitude(coordinate[1])
                 .build();
 
         try {
@@ -44,4 +49,6 @@ public class WishlistService {
         }
         return true;
     }
+
+
 }

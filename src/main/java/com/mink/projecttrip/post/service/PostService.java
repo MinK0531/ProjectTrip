@@ -1,5 +1,6 @@
 package com.mink.projecttrip.post.service;
 
+import com.mink.projecttrip.city.service.CityService;
 import com.mink.projecttrip.common.FileManager;
 import com.mink.projecttrip.post.domain.Post;
 import com.mink.projecttrip.post.domain.PostImage;
@@ -19,6 +20,7 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final PostImageRepository postImageRepository;
+    private final CityService cityService;
 
     @Transactional
     public boolean createPost(long userId,
@@ -28,9 +30,10 @@ public class PostService {
                               String atmosphere,
                               String placeName,
                               String musicUrl,
-                              double latitude,
-                              double longitude,
                               List<MultipartFile> images){
+
+        double[] coordinate =
+                cityService.getCoordinate(countryId, cityName);
 
         Post post = Post.builder()
                 .userId(userId)
@@ -40,8 +43,8 @@ public class PostService {
                 .atmosphere(atmosphere)
                 .placeName(placeName)
                 .musicUrl(musicUrl)
-                .latitude(latitude)
-                .longitude(longitude)
+                .latitude(coordinate[0])
+                .longitude(coordinate[1])
                 .build();
 
         postRepository.save(post);

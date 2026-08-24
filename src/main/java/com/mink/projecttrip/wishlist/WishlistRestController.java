@@ -24,8 +24,6 @@ public class WishlistRestController {
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate,
             @RequestParam(required = false) String memo,
-            @RequestParam(required = false, defaultValue = "0.0") double latitude,
-            @RequestParam(required = false, defaultValue = "0.0") double longitude,
             HttpSession session
     ) {
         if (session == null || session.getAttribute("userId") == null) {
@@ -40,9 +38,7 @@ public class WishlistRestController {
                 period,
                 startDate,
                 endDate,
-                memo,
-                latitude,
-                longitude)) {
+                memo)) {
             return ApiResponse.success("위시리스트 등록 성공");
         } else {
             return ApiResponse.fail("위시리스트 등록 실패");

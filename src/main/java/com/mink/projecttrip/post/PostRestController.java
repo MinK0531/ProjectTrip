@@ -29,8 +29,6 @@ public class PostRestController {
             @RequestParam(required = false) String atmosphere,
             @RequestParam(required = false) String placeName,
             @RequestParam(required = false) String musicUrl,
-            @RequestParam(required = false, defaultValue = "0.0") double latitude,
-            @RequestParam(required = false, defaultValue = "0.0") double longitude,
             @RequestParam(required = false) List<MultipartFile> images,
             HttpServletRequest request
     ){
@@ -50,8 +48,6 @@ public class PostRestController {
                     atmosphere,
                     placeName,
                     musicUrl,
-                    latitude,
-                    longitude,
                     images
             )){
                 return ApiResponse.success("게시물 등록 성공");

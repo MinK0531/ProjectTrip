@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.List;
+
 @Getter
 @Builder
 @AllArgsConstructor
@@ -21,6 +23,8 @@ public class PostDetail {
     private String musicUrl;
     private double latitude;
     private double longitude;
+
+    private List<PostImageDetail> imageList;
 
     private int likeCount;
     private boolean isLike;
