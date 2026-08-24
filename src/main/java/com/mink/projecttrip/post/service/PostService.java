@@ -1,17 +1,26 @@
 package com.mink.projecttrip.post.service;
 
+import com.mink.projecttrip.common.FileManager;
 import com.mink.projecttrip.post.domain.Post;
+import com.mink.projecttrip.post.domain.PostImage;
+import com.mink.projecttrip.post.repository.PostImageRepository;
 import com.mink.projecttrip.post.repository.PostRepository;
 import lombok.AllArgsConstructor;
-import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class PostService {
 
     private final PostRepository postRepository;
+    private final PostImageRepository postImageRepository;
 
+    @Transactional
     public boolean createPost(long userId,
                               long countryId,
                               String contents,
@@ -20,7 +29,8 @@ public class PostService {
                               String placeName,
                               String musicUrl,
                               double latitude,
-                              double longitude){
+                              double longitude,
+                              List<MultipartFile> images){
 
         Post post = Post.builder()
                 .userId(userId)
@@ -34,11 +44,38 @@ public class PostService {
                 .longitude(longitude)
                 .build();
 
-        try{
-            postRepository.save(post);
-        }catch(DataAccessException e){
-            return false;
+        postRepository.save(post);
+
+        if(images != null && !images.isEmpty()){
+            List<String> savedImagePaths = new ArrayList<>();
+            int sortOrder = 0;
+
+            for(MultipartFile image : images){
+                if(image == null || image.isEmpty()){
+                    continue;
+                }
+
+                String imagePath = FileManager.saveFile(userId, image);
+
+                if(imagePath == null){
+                    for(String path : savedImagePaths){
+                        FileManager.removeFile(path);
+                    }
+                    throw new IllegalStateException("이미지 저장에 실패했습니다.");
+                }
+
+                savedImagePaths.add(imagePath);
+
+                PostImage postImage = PostImage.builder()
+                        .postId(post.getId())
+                        .imagePath(imagePath)
+                        .sortOrder(sortOrder++)
+                        .build();
+
+                postImageRepository.save(postImage);
+            }
         }
+
         return true;
     }
 }

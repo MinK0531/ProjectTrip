@@ -31,6 +31,7 @@ public class PostRestController {
             @RequestParam(required = false) String musicUrl,
             @RequestParam(required = false, defaultValue = "0.0") double latitude,
             @RequestParam(required = false, defaultValue = "0.0") double longitude,
+            @RequestParam(required = false) List<MultipartFile> images,
             HttpServletRequest request
     ){
         HttpSession session = request.getSession();
@@ -40,20 +41,24 @@ public class PostRestController {
 
         long userId = (long)session.getAttribute("userId");
 
-        if(postService.createPost(
-                userId,
-                countryId,
-                contents,
-                cityName,
-                atmosphere,
-                placeName,
-                musicUrl,
-                latitude,
-                longitude
-
-        )){
-            return ApiResponse.success("게시물 등록 성공");
-        }else{
+        try{
+            if(postService.createPost(
+                    userId,
+                    countryId,
+                    contents,
+                    cityName,
+                    atmosphere,
+                    placeName,
+                    musicUrl,
+                    latitude,
+                    longitude,
+                    images
+            )){
+                return ApiResponse.success("게시물 등록 성공");
+            }else{
+                return ApiResponse.fail("게시물 등록 실패");
+            }
+        }catch(Exception e){
             return ApiResponse.fail("게시물 등록 실패");
         }
     }

@@ -11,6 +11,8 @@
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet"
           href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 </head>
 
 <body class="bg-gray-50">
@@ -384,11 +386,16 @@
         </div>
     </div>
 </div>
+
+
+
+
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/lucide@latest"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
 <th:block layout:fragment="content"></th:block>
 <th:block layout:fragment="script"></th:block>
@@ -396,6 +403,7 @@
 <script>lucide.createIcons();</script>
 
 <script>
+
     $("#countrySelect").one("click",function (){
         let $countryId = $("#countrySelect");
 
@@ -408,7 +416,8 @@
                     $countryId.append(
                         $("<option>", {
                             value: country.id,
-                            text: country.countryNameKo + " (" + country.countryNameEn + ")"
+                            text: country.countryNameKo + " (" + country.countryNameEn + ")",
+                            "data-country-code": country.countryCode
                         })
                     );
                 });
@@ -418,53 +427,400 @@
             }
         });
     });
-    $("#uploadBtn").on("click", function (){
-       let contents = $("#contentsInput").val();
-       let countryId = $("#countrySelect").val();
-       let musicUrl = $("#musicInput").val();
-       let cityName = $("#cityNameSelect").val();
-       let placeName = $("#placeNameInput").val();
-       let atmosphere = $("#placeMoodInput").val();
 
-       if(contents == ""){
-           alert("내용을 입력하세요");
-           return;
-       }
-       if(countryId == ""){
-           alert("나라를 선택하세요");
-           return;
-       }
+    $("#countrySelect").on("click",function (){
+        let $countrySelect = $(this);
+        let $citySelect = $("#cityNameSelect");
 
-       $.ajax({
-          type: "post"
-          ,url: "/post/write-process"
-          ,data: {
-              "contents": contents
-               , "countryId": countryId
-               , "cityName": cityName
-               , "musicUrl": musicUrl
-               , "placeName": placeName
-               , "atmosphere": atmosphere
-           }
-           ,success: function (response){
-               if (response.result === "success")
-                   location.reload();
-               else {
-                   alert("작성 실패");
-               }
-           },error: function (){
-              alert("작성 실패");
-           }
-       });
+        let countryCode = $countrySelect.find(":selected").data("country-code");
+        $citySelect.empty();
+
+        $citySelect.prop("disabled", false);
+
+        if (!countryCode) {
+            return;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/city/list",
+            contentType: "application/json",
+            data: JSON.stringify({
+                countryCode: countryCode
+            }),
+            success: function (response) {
+                response.forEach(function (city) {
+                    $citySelect.append(
+                        $("<option>", {
+                            value: city,
+                            text: city
+                        })
+                    );
+                });
+            },
+            error: function () {
+                console.error("나라 목록을 불러오지 못했습니다.");
+            }
+        });
 
     });
 
-    function openWishlistWrite() {
+    let selectedFiles = [];
+    let postSwiperInstance = null;
+    const MAX_IMAGES = 10;
 
-        console.log("위시리스트 작성");
+
+    function addFiles(fileList) {
+
+        let files = Array.from(fileList);
+
+        files = files.filter(file => file.type.startsWith("image/"));
+
+        const canAdd = MAX_IMAGES - selectedFiles.length;
+
+        if (canAdd <= 0) {
+            alert("사진은 최대 10장까지 업로드할 수 있습니다.");
+            return;
+        }
+
+        if (files.length > canAdd) {
+            alert("사진은 최대 10장까지 업로드할 수 있습니다.");
+            files = files.slice(0, canAdd);
+        }
+
+        selectedFiles.push(...files);
+
+        renderPreviews();
     }
+
+
+    function removeFile(index) {
+
+        selectedFiles.splice(index, 1);
+
+        renderPreviews();
+    }
+
+
+    function renderPreviews() {
+
+        const $wrapper = $("#imagePreviewWrapper");
+
+        $wrapper.empty();
+
+
+        if (selectedFiles.length === 0) {
+
+            $("#upload-placeholder").removeClass("d-none");
+            $("#swiper-wrapper-box").addClass("d-none");
+
+            return;
+        }
+
+
+        $("#upload-placeholder").addClass("d-none");
+        $("#swiper-wrapper-box").removeClass("d-none");
+
+
+        selectedFiles.forEach(function (file, index) {
+
+            const imageUrl = URL.createObjectURL(file);
+
+            $wrapper.append(
+                '<div class="swiper-slide preview-slide">' +
+                '<img src="' + imageUrl + '" class="preview-image">' +
+                '<button type="button" ' +
+                'class="preview-remove-btn" ' +
+                'data-index="' + index + '">' +
+                '&times;' +
+                '</button>' +
+                '</div>'
+            );
+        });
+
+
+        if (postSwiperInstance) {
+            postSwiperInstance.destroy(true, true);
+        }
+
+
+        postSwiperInstance = new Swiper(".post-swiper", {
+            slidesPerView: 1,
+            pagination: {
+                el: ".swiper-pagination",
+                clickable: true
+            }
+        });
+    }
+
+
+    $("#selectImageBtn").on("click", function () {
+
+        $("#image-input").trigger("click");
+    });
+
+
+    $("#image-input").on("change", function (e) {
+
+        addFiles(e.target.files);
+
+        $(this).val("");
+    });
+
+
+    $("#drop-zone").on("dragover", function (e) {
+
+        e.preventDefault();
+
+        $(this).addClass("drag-over");
+    });
+
+
+    $("#drop-zone").on("dragleave", function (e) {
+
+        e.preventDefault();
+
+        $(this).removeClass("drag-over");
+    });
+
+
+    $("#drop-zone").on("drop", function (e) {
+
+        e.preventDefault();
+
+        $(this).removeClass("drag-over");
+
+        const files = e.originalEvent.dataTransfer.files;
+
+        addFiles(files);
+    });
+
+
+    $(document).on("click", ".preview-remove-btn", function () {
+
+        const index = $(this).data("index");
+
+        removeFile(index);
+    });
+
+
+    $("#postCreateModal").on("hidden.bs.modal", function () {
+
+        selectedFiles = [];
+
+        renderPreviews();
+
+        $("#contentsInput").val("");
+        $("#musicInput").val("");
+        $("#placeNameInput").val("");
+        $("#placeMoodInput").val("");
+        $("#countrySelect").val("");
+    });
+
+
+
+    $("#uploadBtn").on("click", function (){
+        let contents = $("#contentsInput").val();
+        let countryId = $("#countrySelect").val();
+        let musicUrl = $("#musicInput").val();
+        let cityName = $("#cityNameSelect").val();
+        let placeName = $("#placeNameInput").val();
+        let atmosphere = $("#placeMoodInput").val();
+        let latitude = $("#latitude").val();
+        let longitude = $("#longitude").val();
+
+        if(contents == ""){
+            alert("내용을 입력하세요");
+            return;
+        }
+        if (!countryId) {
+            alert("나라를 선택하세요.");
+            return;
+        }
+
+        if (selectedFiles.length === 0) {
+            alert("사진을 최소 한 장 이상 업로드하세요.");
+            return;
+        }
+
+        let formData = new FormData();
+        formData.append("contents", contents);
+        formData.append("countryId", countryId);
+        formData.append("cityName", cityName);
+        formData.append("musicUrl", musicUrl);
+        formData.append("placeName", placeName);
+        formData.append("atmosphere", atmosphere);
+        formData.append("latitude", latitude);
+        formData.append("longitude", longitude);
+
+        selectedFiles.forEach(function (file) {
+            formData.append("images", file);
+        });
+
+        $.ajax({
+            type: "POST"
+            ,url: "/post/write-process"
+            ,data: formData
+            ,processData: false
+            ,contentType: false
+            ,success: function (response){
+                if (response.result === "success")
+                    location.reload();
+                else {
+                    alert("작성 실패");
+                }
+            },error: function (){
+                alert("작성 에러");
+            }
+        });
+
+    });
 
     lucide.createIcons();
 </script>
+
+
+<script>
+
+
+    $("#wishCountryId").one("click",function (){
+        let $countryId = $("#wishCountryId");
+
+        $.ajax({
+            type: "get",
+            url: "/country/list",
+            success: function (response) {
+
+                response.forEach(function (country) {
+                    $countryId.append(
+                        $("<option>", {
+                            value: country.id,
+                            text: country.countryNameKo + " (" + country.countryNameEn + ")",
+                            "data-country-code": country.countryCode
+                        })
+                    );
+                });
+            },
+            error: function () {
+                console.error("국가 목록을 불러오지 못했습니다.");
+            }
+        });
+    });
+
+    $("#wishCountryId").on("click",function (){
+        let $countrySelect = $(this);
+        let $citySelect = $("#wishCityName");
+
+        let countryCode = $countrySelect.find(":selected").data("country-code");
+        $citySelect.empty();
+
+        $citySelect.prop("disabled", false);
+
+        if (!countryCode) {
+            return;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: "/city/list",
+            contentType: "application/json",
+            data: JSON.stringify({
+                countryCode: countryCode
+            }),
+            success: function (response) {
+                response.forEach(function (city) {
+                    $citySelect.append(
+                        $("<option>", {
+                            value: city,
+                            text: city
+                        })
+                    );
+                });
+            },
+            error: function () {
+                console.error("나라 목록을 불러오지 못했습니다.");
+            }
+        });
+
+    });
+
+
+
+
+    $("#wishStartDate").on("change", function () {
+
+        const startDate = $(this).val();
+
+        if (!startDate) {
+            $("#wishEndDate").removeAttr("min");
+            return;
+        }
+
+        $("#wishEndDate").attr("min", startDate);
+
+        const endDate = $("#wishEndDate").val();
+
+        if (endDate && endDate < startDate) {
+            $("#wishEndDate").val("");
+        }
+    });
+
+
+    $("#wishSubmitBtn").on("click", function (){
+        let countryId = $("#wishCountryId").val();
+        let cityName = $("#wishCityName").val();
+        let period = $("#wishPeriod").val();
+
+        let startDate = $("#wishStartDate").val();
+        let endDate = $("#wishEndDate").val();
+        let memo = $("#wishMemo").val();
+
+        let latitude = $("#wishLatitude").val();
+        let longitude = $("#wishLongitude").val();
+
+        if (!countryId) {
+            alert("나라를 선택하세요.");
+            return;
+        }
+        if (!period) {
+            alert("희망 시기를 입력하세요.");
+            return;
+        }
+        if (startDate && endDate && endDate < startDate) {
+            alert("끝 날짜는 시작 날짜보다 빠를 수 없습니다.");
+            return;
+        }
+
+        let formData = new FormData();
+        formData.append("countryId", countryId);
+        formData.append("cityName", cityName);
+        formData.append("period", period);
+        formData.append("startDate", startDate);
+        formData.append("endDate", endDate);
+        formData.append("memo", memo);
+        formData.append("latitude", latitude);
+        formData.append("longitude", longitude);
+
+
+        $.ajax({
+            type: "POST"
+            ,url: "/wishlist/create"
+            ,data: formData
+            ,processData: false
+            ,contentType: false
+            ,success: function (response){
+                if (response.result === "success")
+                    location.reload();
+                else {
+                    alert("위시리스트 작성 실패");
+                }
+            },error: function (){
+                alert("위시리스트 작성 에러");
+            }
+        });
+
+    });
+</script>
+
 </body>
 </html>

@@ -524,25 +524,27 @@ main {
     display: block;
 }
 
-.remove-img-btn {
+.preview-remove-btn {
     position: absolute;
     top: 10px;
     right: 10px;
+
     width: 32px;
     height: 32px;
-    border-radius: 999px;
     border: none;
+    border-radius: 50%;
     background: rgba(0, 0, 0, 0.6);
-    color: #fff;
+    color: white;
     font-size: 22px;
-    line-height: 32px;
+    line-height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
     cursor: pointer;
+    z-index: 10;
+    padding: 0;
 }
-.remove-img-btn:hover { background: rgba(0, 0, 0, 0.75); }
+.preview-remove-btn:hover { background: rgba(0, 0, 0, 0.75); }
 
 .slider-dots {
     position: absolute;
