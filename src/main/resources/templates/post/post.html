@@ -1,0 +1,125 @@
+
+
+<div th:fragment="post(post)"
+     class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative mb-4">
+
+    <div class="border-t border-gray-300 border-b relative h-20 flex items-center px-4 overflow-hidden">
+        <div class="flex items-center gap-3 z-10">
+            <div class="w-12 h-12 rounded-full border-2 border-gray-100 overflow-hidden bg-orange-100">
+                <img src="/img/profile.png" alt="Profile" class="w-full h-full object-cover postcard-profile-img">
+            </div>
+
+            <div>
+                <p class="font-bold text-lg"
+                   th:text="${post.nickName != null ? post.nickName : 'User'}">User</p>
+
+                <div class="flex items-center gap-2 text-sm text-gray-500">
+                    <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+                    <span th:text="${post.countryName != null ? post.countryName : ''}">나라</span>
+                    <span class="text-xs"
+                          th:if="${post.createdAt != null}"
+                          th:text="${#temporals.format(post.createdAt,'yyyy-MM-dd')}"></span>
+                </div>
+            </div>
+        </div>
+        <div th:if="${(post.placeName != null and post.placeName != '') or (post.cityName != null and post.cityName != '' and post.cityName != 'null') or (post.atmosphere != null and post.atmosphere != '')}"
+             class="absolute right-0 top-0 h-full w-1/2 bg-blue-50 border-l border-b border-blue-200 polygon">
+            <div class="h-full flex flex-col justify-center pl-12 pr-4">
+                <div class="space-y-1 gap-1.5">
+                    <div class="flex gap-1.5"
+                         th:if="${post.cityName != null and post.cityName != '' and post.cityName != 'null'}">
+                        <i data-lucide="map-pin" class="w-5 h-5 text-blue-600"></i>
+                        <p th:text="${post.cityName}"
+                           class="font-bold text-blue-900 text-sm"></p>
+                    </div>
+                    <p th:if="${post.placeName != null and post.placeName != ''}"
+                       th:text="${post.placeName}"
+                       class="ml-3 text-blue-600 text-xs"></p>
+                    <p th:if="${post.atmosphere != null and post.atmosphere != ''}"
+                       th:text="${post.atmosphere}"
+                       class="ml-4 text-blue-500 text-[10px]"></p>
+                </div>
+            </div>
+        </div>
+        <div class="absolute right-4 top-1/2 -translate-y-1/2 z-20">
+            <i th:if="${post.userId != null and session.userId != null and post.userId == session.userId}"
+               class="bi bi-three-dots-vertical more-btn text-blue-600 cursor-pointer text-xl" th:data-post-id="${post.id}" data-type="POST"></i>
+        </div>
+    </div>
+    <div class="relative bg-gray-50 aspect-square overflow-hidden w-full min-w-0">
+
+        <div th:if="${post.imageList != null and not #lists.isEmpty(post.imageList)}"
+             class="swiper feed-swiper w-full h-full min-w-0"
+             th:id="|feed-swiper-${post.id}|">
+
+            <div class="swiper-wrapper w-full h-full" style="display: flex;">
+                <div th:each="img : ${post.imageList}"
+                     class="swiper-slide w-full h-full flex items-center justify-center flex-shrink-0">
+                    <img th:if="${img != null and img.imagePath != null}"
+                         th:src="${img.imagePath}"
+                         alt="post image"
+                         class="w-full h-full object-cover block">
+                </div>
+            </div>
+
+            <div th:if="${#lists.size(post.imageList) > 1}" class="swiper-pagination"></div>
+
+        </div>
+
+        <div th:if="${post.imageList == null or #lists.isEmpty(post.imageList)}"
+             class="w-full h-full flex flex-col items-center justify-center text-gray-300">
+            <i data-lucide="image-off" class="w-16 h-16 mb-2"></i>
+            <p class="text-sm">이미지가 없습니다</p>
+        </div>
+
+    </div>
+    <div class="border-t border-gray-300 p-3 pl-1 pr-1 space-y-3">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center gap-1.5 transition-opacity">
+                <button type="button">
+                    <i th:if="${post.isLike}"
+                       class="bi bi-heart-fill text-danger btn-like-icon unlike-btn"
+                       th:data-post-id="${post.id}"></i>
+
+                    <i th:unless="${post.isLike}"
+                       class="bi bi-heart text-dark btn-like-icon icon-stroke-thick like-btn"
+                       th:data-post-id="${post.id}"></i>
+
+                    <span class="count-text" th:text="${post.likeCount != null ? post.likeCount : 0}">0</span>
+                </button>
+
+                <button type="button" class="open-post-detail ml-2"
+                        th:data-post-id="${post.id}">
+                    <i class="bi bi-chat text-dark btn-like-icon icon-stroke-thick"></i>
+                    <span class="count-text">0</span>
+                </button>
+
+                <button type="button" class="ml-3">
+                    <i class="bi bi-share text-dark btn-like-icon icon-stroke-thick"></i>
+                </button>
+                <button type="button" class="ml-3">
+                    <i class="bi bi-send text-dark btn-like-icon icon-stroke-thick"></i>
+                </button>
+            </div>
+
+            <button type="button">
+                <i class="bi bi-bookmark text-dark btn-like-icon icon-stroke-thick"></i>
+            </button>
+        </div>
+
+    </div>
+    <div class="flex gap-2 text-m mb-3 ml-3">
+        <span class="font-bold" th:text="${post.nickName != null ? post.nickName : 'User'}">User</span>
+        <span th:text="${post.contents != null ? post.contents : ''}">내용</span>
+    </div>
+
+    <div th:if="${post.musicUrl != null and post.musicUrl != ''}"
+         class="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
+        <i data-lucide="music" class="w-4 h-4"></i>
+        <span th:text="${post.musicUrl}" class="m-2"></span>
+    </div>
+</div>
+
+
+
+

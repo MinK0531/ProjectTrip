@@ -4,9 +4,10 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{components/default_head}">
 <head>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
 </head>
 
 <body>
@@ -21,134 +22,188 @@
 
             <div th:if="${feedList != null and !#lists.isEmpty(feedList)}">
 
-                <div th:each="post : ${feedList}"
-                     class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative mb-4">
-                    <div class="border-t border-gray-300 border-b relative h-20 flex items-center px-4 overflow-hidden">
-                        <div class="flex items-center gap-3 z-10">
-                            <div class="w-12 h-12 rounded-full border-2 border-gray-100 overflow-hidden bg-orange-100">
-                                <img src="/img/profile.png" alt="Profile" class="w-full h-full object-cover postcard-profile-img">
-                            </div>
+                <div th:each="feed : ${feedList}">
 
-                            <div>
-                                <p class="font-bold text-lg"
-                                   th:text="${post.nickName != null ? post.nickName : 'User'}">User</p>
 
-                                <div class="flex items-center gap-2 text-sm text-gray-500">
-                                    <i data-lucide="globe" class="w-3.5 h-3.5"></i>
-                                    <span th:text="${post.countryName != null ? post.countryName : ''}">나라</span>
-                                    <span class="text-xs"
-                                          th:if="${post.createdAt != null}"
-                                          th:text="${#temporals.format(post.createdAt,'yyyy-MM-dd')}"></span>
-                                </div>
-                            </div>
-                        </div>
-                        <div th:if="${(post.placeName != null and post.placeName != '') or (post.cityName != null and post.cityName != '' and post.cityName != 'null') or (post.atmosphere != null and post.atmosphere != '')}"
-                             class="absolute right-0 top-0 h-full w-1/2 bg-blue-50 border-l border-b border-blue-200 polygon">
-                            <div class="h-full flex flex-col justify-center pl-12 pr-4">
-                                <div class="space-y-1 gap-1.5">
-                                    <div class="flex gap-1.5"
-                                         th:if="${post.cityName != null and post.cityName != '' and post.cityName != 'null'}">
-                                        <i data-lucide="map-pin" class="w-5 h-5 text-blue-600"></i>
-                                        <p th:text="${post.cityName}"
-                                           class="font-bold text-blue-900 text-sm"></p>
-                                    </div>
-                                    <p th:if="${post.placeName != null and post.placeName != ''}"
-                                       th:text="${post.placeName}"
-                                       class="ml-3 text-blue-600 text-xs"></p>
-                                    <p th:if="${post.atmosphere != null and post.atmosphere != ''}"
-                                       th:text="${post.atmosphere}"
-                                       class="ml-4 text-blue-500 text-[10px]"></p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="absolute right-4 top-1/2 -translate-y-1/2 z-20">
-                            <i th:if="${post.userId != null and session.userId != null and post.userId == session.userId}"
-                               class="bi bi-three-dots-vertical more-btn text-blue-600 cursor-pointer text-xl"></i>
-                        </div>
-                    </div>
-                    <div class="relative bg-gray-50 aspect-square overflow-hidden">
+                    <div th:if="${feed.type == 'POST'}"
+                         th:with="post=${feed.data}">
 
-                        <div th:if="${post.imageList != null and not #lists.isEmpty(post.imageList)}"
-                             class="swiper feed-swiper w-full h-full"
-                             th:attr="data-post-id=${post.id}">
-                            <div class="swiper-wrapper w-full h-full">
-                                <div th:each="img : ${post.imageList}" class="swiper-slide w-full h-full">
-                                    <img th:if="${img != null and img.imagePath != null}"
-                                         th:src="${img.imagePath}"
-                                         class="w-full h-full object-cover"
-                                         alt="post image">
-                                </div>
-                            </div>
-                            <div th:if="${#lists.size(post.imageList) > 1}" class="swiper-pagination"></div>
-                        </div>
-
-                        <div th:if="${post.imageList == null or #lists.isEmpty(post.imageList)}"
-                             class="w-full h-full flex flex-col items-center justify-center text-gray-300">
-                            <i data-lucide="image-off" class="w-16 h-16 mb-2"></i>
-                            <p class="text-sm">이미지가 없습니다</p>
+                        <div th:replace="~{post/post :: post(post=${post})}">
                         </div>
 
                     </div>
-                    <div class="border-t border-gray-300 p-3 pl-1 pr-1 space-y-3">
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center gap-1.5 transition-opacity">
-                                <button type="button">
-<!--                                    <i-->
-<!--                                       class="bi bi-heart-fill text-danger btn-like-icon unlike-btn"-->
-<!--                                       th:data-post-id="${post.id}"></i>-->
 
-                                    <i
-                                       class="bi bi-heart text-dark btn-like-icon icon-stroke-thick like-btn"
-                                       th:data-post-id="${post.id}"></i>
 
-                                    <span class="count-text">0</span>
-                                </button>
+                    <div th:if="${feed.type == 'WISHLIST'}"
+                         th:with="wishlist=${feed.data}">
 
-                                <button type="button" class="open-post-detail ml-2"
-                                        th:data-post-id="${post.id}"
-                                        th:data-nickname="${post.nickName != null ? post.nickName : ''}"
-                                        th:data-location="|${post.countryName != null ? post.countryName : ''} - ${post.cityName != null ? post.cityName : ''}|"
-                                        th:data-content="${post.contents != null ? post.contents : ''}"
-                                        th:data-city-name="${post.cityName}"
-                                        th:data-place-name="${post.placeName}"
-                                        th:data-atmosphere="${post.atmosphere}">
-                                    <i class="bi bi-chat text-dark btn-like-icon icon-stroke-thick"></i>
-                                    <span class="count-text">0</span>
-                                </button>
-
-                                <button type="button" class="ml-3">
-                                    <i class="bi bi-share text-dark btn-like-icon icon-stroke-thick"></i>
-                                </button>
-                                <button type="button" class="ml-3">
-                                    <i class="bi bi-send text-dark btn-like-icon icon-stroke-thick"></i>
-                                </button>
-                            </div>
-
-                            <button type="button">
-                                <i class="bi bi-bookmark text-dark btn-like-icon icon-stroke-thick"></i>
-                            </button>
+                        <div th:replace="~{wishlist/wishlist :: wishlist(wishlist=${wishlist})}">
                         </div>
 
-                    </div>
-                    <div class="flex gap-2 text-m mb-3 ml-3">
-                        <span class="font-bold" th:text="${post.nickName != null ? post.nickName : 'User'}">User</span>
-                        <span th:text="${post.contents != null ? post.contents : ''}">내용</span>
-                    </div>
-
-                    <div th:if="${post.musicUrl != null and post.musicUrl != ''}"
-                         class="flex items-center gap-2 text-xs text-blue-600 bg-blue-50 px-3 py-2 rounded-lg">
-                        <i data-lucide="music" class="w-4 h-4"></i>
-                        <span th:text="${post.musicUrl}" class="m-2"></span>
                     </div>
 
                 </div>
 
             </div>
         </div>
+        <div class="modal fade create-choice-modal" id="moreModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-body">
+
+                        <button type="button" class="btn-choice edit-post-btn d-none">게시물 수정</button>
+                        <button type="button" class="btn-choice delete-post-btn d-none">게시물 삭제</button>
+
+                        <button type="button" class="btn-choice edit-wishlist-btn d-none">위시리스트 수정</button>
+                        <button type="button" class="btn-choice delete-wishlist-btn d-none">위시리스트 삭제</button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div th:replace="~{post/post_card :: #postDetailModal}"></div>
     </main>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+
+        $(".open-post-detail").on("click", function () {
+            let postId = $(this).data("post-id");
+
+            $("#modalPostId").val(postId);
+
+            $("#postDetailModal").modal("show");
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+
+            document.querySelectorAll(".feed-swiper").forEach(function (element) {
+
+                new Swiper(element, {
+
+                    slidesPerView: 1,
+                    spaceBetween: 0,
+                    loop: false,
+                    pagination: {
+                        el: element.querySelector(".swiper-pagination"),
+                        clickable: true
+                    }, touchRatio: 1,
+                    grabCursor: true
+                });
+            });
+        });
+
+        $(".delete-wishlist-btn").on("click",function (){
+            let wishlistId = $(this).data("wishlist-id");
+
+            $.ajax({
+               type:"delete"
+                ,url: "/wishlist/remove"
+                ,data:{"wishlistId":wishlistId}
+                ,success: function (response){
+                   if(response.result == "success"){
+                       location.reload();
+                   }else{
+                       alert("위시리스트 삭제 실패");
+                   }
+                },error:function (){
+                   alert("위시리스트 삭제 에러");
+                }
+
+            });
+
+        });
+
+        $(".delete-post-btn").on("click",function (){
+            let postId = $(this).data("post-id");
+
+            $.ajax({
+               type:"delete"
+                ,url:"/post/remove"
+                ,data:{"postId":postId}
+                ,success: function (response){
+                   if(response.result =="success"){
+                       location.reload();
+                   }else {
+                       alert("게시물 삭제 실패");
+                   }
+                },error: function (){
+                   alert("게시물 삭제 에러");
+                }
+            });
+
+        });
+
+        $(".more-btn").on("click",function (){
+            let postId = $(this).data("post-id");
+            let wishlistId = $(this).data("wishlist-id");
+            let type = $(this).data("type");
+
+
+
+            $(".edit-post-btn").addClass("d-none").removeData("post-id");
+            $(".delete-post-btn").addClass("d-none").removeData("post-id");
+
+            $(".edit-wishlist-btn").addClass("d-none").removeData("wishlist-id");
+            $(".delete-wishlist-btn").addClass("d-none").removeData("wishlist-id");
+
+            if(type == "POST"){
+                $(".edit-post-btn") .removeClass("d-none") .data("post-id", postId);
+                $(".delete-post-btn") .removeClass("d-none") .data("post-id", postId);
+            }
+
+            if(type == "WISHLIST"){
+                $(".edit-wishlist-btn") .removeClass("d-none") .data("wishlist-id", wishlistId);
+                $(".delete-wishlist-btn") .removeClass("d-none") .data("wishlist-id", wishlistId);
+            }
+
+
+            $("#moreModal").modal("show");
+        });
+
+        $(".like-btn").on("click",function (){
+
+            let postId = $(this).data("post-id");
+
+            $.ajax({
+                type:"post"
+                , url:"/post/like"
+                , data:{"postId":postId}
+                , success:function (response){
+                    if(response.result == "success"){
+                        location.reload();
+                    }else{
+                        alert("좋아요 실패");
+                    }
+                },error: function (){
+                    alert("좋아요 에러");
+                }
+            });
+
+        });
+        $(".unlike-btn").on("click",function (){
+            let postId = $(this).data("post-id");
+
+            $.ajax({
+                type:"DELETE"
+                , url:"/post/unlike"
+                , data:{"postId":postId}
+                , success:function (response){
+                    if(response.result == "success"){
+                        location.reload();
+                    }else{
+                        alert("좋아요 취소 실패");
+                    }
+                },error: function (){
+                    alert("좋아요 취소 에러");
+                }
+            });
+        });
+    </script>
 </div>
-<script src="https://unpkg.com/lucide@latest"></script>
-<script src="https://cdn.tailwindcss.com"></script>
 
 </body>
 </html>

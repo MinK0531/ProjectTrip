@@ -4,6 +4,7 @@ import com.mink.projecttrip.city.service.CityService;
 import com.mink.projecttrip.common.FileManager;
 import com.mink.projecttrip.country.domain.Country;
 import com.mink.projecttrip.country.repository.CountryRepository;
+import com.mink.projecttrip.like.service.LikeService;
 import com.mink.projecttrip.post.domain.Post;
 import com.mink.projecttrip.post.domain.PostImage;
 import com.mink.projecttrip.post.dto.PostDetail;
@@ -13,6 +14,7 @@ import com.mink.projecttrip.post.repository.PostRepository;
 import com.mink.projecttrip.user.domain.User;
 import com.mink.projecttrip.user.service.UserService;
 import lombok.AllArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -30,6 +33,7 @@ public class PostService {
     private final CityService cityService;
     private final UserService userService;
     private final CountryRepository countryRepository;
+    private final LikeService likeService;
 
     @Transactional
     public boolean createPost(long userId,
@@ -90,8 +94,8 @@ public class PostService {
 
         return true;
     }
-    @Transactional(readOnly = true)
-    public List<PostDetail> getFeedList() {
+    @Transactional
+    public List<PostDetail> getFeedList(long userId) {
 
         List<Post> postList = postRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
 
@@ -101,6 +105,8 @@ public class PostService {
 
             User user = userService.getUserById(post.getUserId());
 
+            int likeCount = likeService.countByPostId(post.getId());
+            boolean isLike = likeService.isLikeByPostIdAndUserId(post.getId(), userId);
 
             List<PostImage> images = postImageRepository
                     .findAllByPostIdOrderBySortOrderAsc(
@@ -134,10 +140,44 @@ public class PostService {
                     .longitude(post.getLongitude())
                     .createdAt(post.getCreatedAt())
                     .imageList(imageList)
+                    .likeCount(likeCount)
+                    .isLike(isLike)
                     .build();
             feedList.add(postDetail);
         }
-
         return feedList;
     }
+
+    @Transactional
+    public boolean deletePost(long userId, long postId){
+        Optional<Post> optionalPost = postRepository.findById(postId);
+
+        if(optionalPost.isPresent()){
+            try{
+                Post post = optionalPost.get();
+
+                if(post.getUserId() != userId){
+                    return false;
+                }
+
+                likeService.deleteLikeByPostId(post.getId());
+
+                List<PostImage> imageList =
+                        postImageRepository.findAllByPostIdOrderBySortOrderAsc(postId);
+
+                for (PostImage image : imageList) {
+                    if (image.getImagePath() != null) {
+                        FileManager.removeFile(image.getImagePath());
+                    }
+                }
+                postRepository.delete(post);
+            }catch(DataAccessException e){
+                return false;
+            }
+        }else{
+            return false;
+        }
+        return true;
+    }
+
 }

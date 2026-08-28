@@ -1,0 +1,51 @@
+<div th:fragment="wishlist(wishlist)"
+     class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative mb-4">
+
+    <div class="p-4 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+            <div>
+                <p class="font-bold text-lg text-purple-700">WISHLIST</p>
+                <p class="text-sm text-gray-500"
+                   th:if="${wishlist.createdAt != null}"
+                   th:text="${#temporals.format(wishlist.createdAt,'yyyy-MM-dd')}"></p>
+            </div>
+
+            <div class="absolute right-4 top-4 z-20">
+                <i th:if="${wishlist.userId != null and session.userId != null and wishlist.userId == session.userId}"
+                   th:data-wishlist-id="${wishlist.id}" data-type="WISHLIST"
+                   class="bi bi-three-dots-vertical more-btn text-blue-600 cursor-pointer text-xl">
+                </i>
+            </div>
+        </div>
+    </div>
+
+    <div class="p-5 space-y-3 wish-body">
+
+        <div class="flex items-start gap-2">
+            <i class="bi bi-geo-alt-fill text-primary wish-country"></i>
+            <div>
+                <div class="text-xl font-bold text-gray-900"
+                     th:text="${wishlist.countryName != null ? wishlist.countryName : '알 수 없는 지역'}">Country</div>
+                <div class="text-sm text-gray-700"
+                     th:if="${wishlist.cityName != null and wishlist.cityName != ''}"
+                     th:text="${wishlist.cityName}">City</div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-2 text-gray-700">
+            <i class="bi bi-calendar-event wish-cal"></i>
+            <span class="font-medium">
+                        <span th:text="${wishlist.period != null ? wishlist.period : ''}">period</span>
+                        <span th:if="${wishlist.startDate != null}" class="ml-2"
+                              th:text="|(${wishlist.startDate}-${wishlist.endDate})|"></span>
+                                </span>
+        </div>
+
+        <div th:if="${wishlist.memo != null and wishlist.memo != ''}"
+             class="rounded-lg p-4 border wish-style">
+            <p class="text-gray-700 text-sm leading-relaxed" th:text="${wishlist.memo}">memo</p>
+        </div>
+
+    </div>
+</div>
+

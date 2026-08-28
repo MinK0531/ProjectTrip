@@ -1,15 +1,24 @@
 package com.mink.projecttrip.wishlist.service;
 
 import com.mink.projecttrip.city.service.CityService;
+
 import com.mink.projecttrip.country.domain.Country;
 import com.mink.projecttrip.country.repository.CountryRepository;
+import com.mink.projecttrip.user.domain.User;
+import com.mink.projecttrip.user.service.UserService;
 import com.mink.projecttrip.wishlist.domain.Wishlist;
+import com.mink.projecttrip.wishlist.dto.WishlistDetail;
 import com.mink.projecttrip.wishlist.repository.WishlistRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -17,6 +26,8 @@ public class WishlistService {
 
     private final WishlistRepository wishlistRepository;
     private final CityService cityService;
+    private final UserService userService;
+    private final CountryRepository countryRepository;
 
     public boolean createWishlist(
             long userId,
@@ -45,6 +56,59 @@ public class WishlistService {
         try {
             wishlistRepository.save(wishlist);
         } catch (DataAccessException e) {
+            return false;
+        }
+        return true;
+    }
+
+    @Transactional
+    public List<WishlistDetail> getFeedList(long userId){
+        List<Wishlist> wishList = wishlistRepository.findAll(Sort.by(Sort.Direction.DESC, "id"));
+
+        List<WishlistDetail> feedList = new ArrayList<>();
+
+        for(Wishlist wish : wishList){
+            User user = userService.getUserById(wish.getUserId());
+            String countryName = countryRepository.findById(wish.getCountryId())
+                    .map(Country::getCountryNameKo)
+                    .orElse("알 수 없는 나라");
+
+            WishlistDetail wishlistDetail = WishlistDetail.builder()
+                    .id(wish.getId())
+                    .userId(wish.getUserId())
+                    .countryId(wish.getCountryId())
+                    .nickName(user.getNickName())
+                    .countryName(countryName)
+                    .cityName(wish.getCityName())
+                    .memo(wish.getMemo())
+                    .period(wish.getPeriod())
+                    .startDate(wish.getStartDate())
+                    .endDate(wish.getEndDate())
+                    .latitude(wish.getLatitude())
+                    .longitude(wish.getLongitude())
+                    .createdAt(wish.getCreatedAt())
+                    .build();
+            feedList.add(wishlistDetail);
+        }
+        return feedList;
+    }
+
+    @Transactional
+    public boolean deleteWishlist(long userId, long wishlistId) {
+        Optional<Wishlist> optionalWishlist = wishlistRepository.findById(wishlistId);
+
+        if(optionalWishlist.isPresent()){
+            try {
+                Wishlist wishlist =optionalWishlist.get();
+
+                if(wishlist.getUserId() != userId){
+                    return false;
+                }
+                wishlistRepository.delete(wishlist);
+            }catch (DataAccessException e){
+                return false;
+            }
+        }else{
             return false;
         }
         return true;

@@ -1,6 +1,8 @@
 package com.mink.projecttrip.home;
 
+import com.mink.projecttrip.home.service.HomeService;
 import com.mink.projecttrip.post.service.PostService;
+import com.mink.projecttrip.wishlist.service.WishlistService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -13,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequestMapping("/home")
 public class HomeController {
 
-    private final PostService postService;
+    private final HomeService homeService;
 
     @GetMapping("/timeline")
     public String timeline(Model model, HttpSession session) {
@@ -22,7 +24,9 @@ public class HomeController {
         if (userId == null) {
             return "redirect:/user/signin";
         }
-        model.addAttribute("feedList", postService.getFeedList());
+
+        model.addAttribute("feedList", homeService.getFeedList(userId));
+
 
         return "home/timeline";
     }

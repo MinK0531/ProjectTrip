@@ -5,11 +5,7 @@ import com.mink.projecttrip.post.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.apache.ibatis.annotations.Param;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -57,5 +53,26 @@ public class PostRestController {
         }catch(Exception e){
             return ApiResponse.fail("게시물 등록 실패");
         }
+    }
+
+
+    @DeleteMapping("/remove")
+    public ApiResponse<Void> remove(
+            @RequestParam long postId,
+            HttpServletRequest request){
+
+        HttpSession session = request.getSession();
+        if(session == null || session.getAttribute("userId") == null){
+            return ApiResponse.fail("로그인이 필요합니다.");
+        }
+
+        long userId = (Long)session.getAttribute("userId");
+
+        if(postService.deletePost(userId, postId)){
+            return ApiResponse.success("삭제 성공");
+        }else{
+            return ApiResponse.fail("삭제 실패");
+        }
+
     }
 }

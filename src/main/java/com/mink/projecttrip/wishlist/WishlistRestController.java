@@ -2,12 +2,10 @@ package com.mink.projecttrip.wishlist;
 
 import com.mink.projecttrip.common.dto.ApiResponse;
 import com.mink.projecttrip.wishlist.service.WishlistService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
 @RestController
@@ -43,6 +41,24 @@ public class WishlistRestController {
         } else {
             return ApiResponse.fail("위시리스트 등록 실패");
 
+        }
+    }
+    @DeleteMapping("/remove")
+    public ApiResponse<Void> remove(
+            @RequestParam long wishlistId,
+            HttpServletRequest request){
+
+        HttpSession session = request.getSession();
+        if(session == null || session.getAttribute("userId") == null){
+            return ApiResponse.fail("로그인이 필요합니다");
+        }
+
+        long userId = (Long) session.getAttribute("userId");
+
+        if(wishlistService.deleteWishlist(userId, wishlistId)){
+            return ApiResponse.success("삭제 성공");
+        }else{
+            return ApiResponse.fail("삭제 실패");
         }
     }
 }

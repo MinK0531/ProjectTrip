@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Builder
 @AllArgsConstructor
 public class WishlistDetail {
+
     private long id;
 
     private long userId;

@@ -31,6 +31,7 @@ public class Post {
     private double latitude;
     private double longitude;
 
+    
     @CreationTimestamp
     private LocalDateTime createdAt;
     @UpdateTimestamp

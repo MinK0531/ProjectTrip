@@ -39,7 +39,7 @@
                     <i data-lucide="message-circle" class="w-6 h-6"></i>
                     <span class="text-xs hidden md:block">메시지</span>
                 </a>
-                
+
                 <a href="/alarm/timeline" class="nav-item flex flex-col items-center gap-1 px-4 py-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
                     <i data-lucide="bell" class="w-6 h-6"></i>
                     <span class="text-xs hidden md:block">알람</span>
@@ -69,13 +69,11 @@
     </div>
 </nav>
 
-<!-- 만들기 선택 모달 -->
+
 <div class="modal fade" id="createChoiceModal" tabindex="-1" role="dialog"
      aria-labelledby="createChoiceModalLabel" aria-hidden="true">
-
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
-
             <div class="modal-header">
                 <h5 class="modal-title" id="createChoiceModalLabel">만들기</h5>
 
@@ -83,15 +81,11 @@
                     <span>&times;</span>
                 </button>
             </div>
-
             <div class="modal-body">
-
                 <button type="button" class="btn btn-light border w-100 mb-3 py-3 text-left" data-dismiss="modal"
                         data-toggle="modal" data-target="#postCreateModal">
-
                     <div class="d-flex align-items-center">
                         <i data-lucide="image" class="mr-3"></i>
-
                         <div>
                             <div class="font-weight-bold">
                                 게시물 만들기
@@ -103,13 +97,10 @@
                     </div>
                 </button>
 
-
                 <button type="button" class="btn btn-light border w-100 py-3 text-left" data-dismiss="modal"
                         data-toggle="modal" data-target="#wishlistCreateModal">
-
                     <div class="d-flex align-items-center">
                         <i data-lucide="heart" class="mr-3"></i>
-
                         <div>
                             <div class="font-weight-bold">
                                 위시리스트 만들기
@@ -127,35 +118,23 @@
 </div>
 
 <div class="modal fade" id="postCreateModal" tabindex="-1" role="dialog" aria-hidden="true">
-
     <div class="modal-dialog modal-dialog-centered post-modal-dialog"
          role="document">
-
         <div class="modal-content post-modal-content">
-
             <div class="ticket-wrapper">
-
                 <div class="ticket-main">
-
                     <div class="ticket-container">
-
-                        <!-- 이미지 업로드 -->
                         <div class="ticket-left-upload p-4">
-
                             <div class="new-post-header">
-
                                 <div class="ticket-plane-icon">
                                     <svg viewBox="0 0 24 24">
                                         <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5v1.5l3.5-1 3.5 1V20.5L13 19v-5.5l8 2.5z"/>
                                     </svg>
                                 </div>
-
                                 <span class="new-post-text">
                                     NEW POST
                                 </span>
-
                             </div>
-
 
                             <div class="upload-main-content"
                                  id="drop-zone">
@@ -164,8 +143,7 @@
 
                                 <div id="upload-placeholder">
 
-                                    <i data-lucide="image"
-                                       class="image-upload-icon"></i>
+                                    <i data-lucide="image" class="image-upload-icon"></i>
 
                                     <p class="upload-text">
                                         사진을 여기에 끌어다 놓으세요
@@ -196,12 +174,10 @@
                         </div>
 
 
-                        <!-- 가운데 -->
                         <div class="ticket-center-input">
 
                             <div class="top-stripe-head">
-                                <img src="/img/top-stripe.png"
-                                     alt="top-stripe">
+                                <img src="/img/top-stripe.png" alt="top-stripe">
                             </div>
 
 
@@ -217,8 +193,7 @@
                                 여행한 나라
                             </label>
 
-                            <select id="countrySelect"
-                                    class="ticket-input">
+                            <select id="countrySelect" class="ticket-input">
                                 <option value="" disabled selected> 나라를 선택하세요</option>
                             </select>
 
@@ -236,7 +211,6 @@
                 </div>
 
 
-                <!-- 오른쪽 티켓 절취선 -->
                 <div class="ticket-stub">
                     <div class="d-flex w-100">
                         <div class="col-10"></div>
@@ -306,7 +280,7 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content p-4">
                 <div class="flex justify-between items-center mb-3">
-                    <h5 id="wishModalTitle" class="fw-bold mb-0">위시리스트 추가</h5>
+                    <h5 id="wishModalTitle" class="font-weight-bold mb-0">위시리스트 추가</h5>
                     <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
                 </div>
 
@@ -578,7 +552,7 @@
 
 
 
-    $("#uploadBtn").on("click", function (){
+    $("#uploadBtn").one("click", function (){
         let contents = $("#contentsInput").val();
         let countryId = $("#countrySelect").val();
         let musicUrl = $("#musicInput").val();
@@ -725,7 +699,7 @@
     });
 
 
-    $("#wishSubmitBtn").on("click", function (){
+    $("#wishSubmitBtn").one("click", function (){
         let countryId = $("#wishCountryId").val();
         let cityName = $("#wishCityName").val();
         let period = $("#wishPeriod").val();
@@ -733,9 +707,6 @@
         let startDate = $("#wishStartDate").val();
         let endDate = $("#wishEndDate").val();
         let memo = $("#wishMemo").val();
-
-        let latitude = $("#wishLatitude").val();
-        let longitude = $("#wishLongitude").val();
 
         if (!countryId) {
             alert("나라를 선택하세요.");
