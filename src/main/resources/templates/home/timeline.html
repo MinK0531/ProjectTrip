@@ -61,7 +61,6 @@
                 </div>
             </div>
         </div>
-        <div th:replace="~{post/post_card :: #postDetailModal}"></div>
     </main>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -69,13 +68,97 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
+        function adjustVerticalLocationFontSize() {
+            const el = document.getElementById("verticalLocation");
+
+            if (el) {
+                const textLength = el.textContent.trim().length;
+
+                let fontSize = 1.1;
+
+                if (textLength > 15) fontSize = 1.0;
+                if (textLength > 18) fontSize = 0.9;
+                if (textLength > 20) fontSize = 0.8;
+                if (textLength > 25) fontSize = 0.75;
+                if (textLength > 30) fontSize = 0.70;
+                el.style.fontSize = fontSize + "rem";
+            }
+        }
+
+        $(document).on("click", "#btnCommentSubmit", function () {
+            let postId = $("#modalPostId").val();
+            let comment = $("#commentInput").val();
+
+            if (!comment || comment.trim() === "") {
+                alert("댓글을 입력하세요.");
+                return;
+            }
+
+            $.ajax({
+                type: "post",
+                url: "/comment/write",
+                data: { postId: postId, comments: comment },
+                success: function (response) {
+                    if (response.result === "success") {
+                        location.reload();
+                    } else {
+                        alert("댓글 작성 실패!");
+                    }
+                },
+                error: function () {
+                    alert("댓글 에러!");
+                }
+            });
+        });
 
         $(".open-post-detail").on("click", function () {
+
             let postId = $(this).data("post-id");
+            sessionStorage.setItem("openPostId", postId);
 
-            $("#modalPostId").val(postId);
+            $.ajax({
+                type: "GET",
+                url: "/post/detail",
+                data: {postId: postId},
+                success: function (response) {
 
-            $("#postDetailModal").modal("show");
+                    $("#postDetailModal").remove();
+                    $("body").append(response);
+                    $("#postDetailModal").modal("show");
+                    lucide.createIcons();
+
+                    adjustVerticalLocationFontSize();
+
+                    const modalSwiper = document.querySelector("#postDetailModal .modal-swiper");
+
+                    if (modalSwiper) {
+                        new Swiper(modalSwiper, {
+                            slidesPerView: 1,
+                            spaceBetween: 0,
+                            loop: false,
+                            pagination: {
+                                el: modalSwiper.querySelector(".swiper-pagination"),
+                                clickable: true
+                            },
+                            touchRatio: 1,
+                            grabCursor: true
+                        });
+                    }
+                }, error: function () {
+                    alert("게시물을 불러오는데 실패했습니다.");
+                }
+            });
+
+        });
+        $(document).on("hidden.bs.modal", "#postDetailModal", function () {
+            sessionStorage.removeItem("openPostId");
+        });
+
+        $(document).ready(function () {
+            let savedPostId = sessionStorage.getItem("openPostId");
+            if (savedPostId) {
+                $(`.open-post-detail[data-post-id="${savedPostId}"]`).trigger("click");
+            }
         });
 
         document.addEventListener("DOMContentLoaded", function () {
@@ -164,9 +247,10 @@
             $("#moreModal").modal("show");
         });
 
-        $(".like-btn").on("click",function (){
+        $(document).on("click", ".like-btn", function(){
 
-            let postId = $(this).data("post-id");
+            let $icon = $(this);
+            let postId = $icon.data("post-id");
 
             $.ajax({
                 type:"post"
@@ -184,7 +268,7 @@
             });
 
         });
-        $(".unlike-btn").on("click",function (){
+        $(document).on("click", ".unlike-btn", function(){
             let postId = $(this).data("post-id");
 
             $.ajax({

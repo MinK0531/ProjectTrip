@@ -1,110 +1,203 @@
-<div class="modal fade" id="postDetailModal" tabindex="-1" aria-hidden="true">
+<div th:fragment="postDetail(post)" id="postDetailModal" class="modal fade" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content border-0 modal-content-fixed">
+
             <div class="d-flex w-100 h-100">
 
                 <div class="ticket-sidebar">
-                    <i data-lucide="plane" class="text-white w-10 h-10 rotate-45"></i>
+
+                    <i data-lucide="plane"
+                       class="text-white w-10 h-10 rotate-45"></i>
 
                     <div class="barcode-deco">
                         <img src="/img/barcodeWW.png" alt="barcode">
                     </div>
 
-                    <div class="vertical-location" id="modalLocationSidebar">대한민국 - JEJU</div>
+                    <div class="vertical-location" id="verticalLocation">
+                        <span th:text="${post.countryName}"></span>
+                        <span th:if="${post.cityName != null
+                            and post.cityName != ''}">
+                            -
+                        </span>
+                        <span th:if="${post.cityName != null
+                            and post.cityName != ''}"
+                              th:text="${post.cityName}">
+                        </span>
+                    </div>
 
                     <div class="barcode-deco">
                         <img src="/img/barcodeW.png" alt="barcode">
                     </div>
+
                 </div>
 
                 <div class="img position-relative bg-dark flex-shrink-0">
+
                     <div class="swiper modal-swiper w-100 h-100">
-                        <div class="swiper-wrapper" id="modalImageWrapper"></div>
-                        <div class="swiper-pagination"></div>
+
+                        <div class="swiper-wrapper">
+
+                            <div th:if="${post.imageList != null
+                                and !#lists.isEmpty(post.imageList)}"
+                                 th:each="img : ${post.imageList}"
+                                 class="swiper-slide">
+
+                                <img th:src="${img.imagePath}"
+                                     alt="post image"
+                                     class="w-100 h-100 object-fit-cover">
+
+                            </div>
+
+                            <div th:if="${post.imageList == null
+                                or #lists.isEmpty(post.imageList)}"
+                                 class="swiper-slide d-flex align-items-center justify-content-center">
+
+                                <span class="text-white">
+                                    이미지가 없습니다
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                        <div th:if="${post.imageList != null
+                            and #lists.size(post.imageList) > 1}"
+                             class="swiper-pagination">
+                        </div>
+
                     </div>
+
                 </div>
 
                 <div class="flex-grow-1 d-flex flex-column bg-white h-100 min-w-0">
                     <div class="blue flex-shrink-0 line"></div>
-
                     <div class="modal-detail-header">
                         <div class="d-flex align-items-center">
                             <div class="modal-writer-profile-wrap">
-                                <img id="modalWriterProfileImg" src="/img/profile.png" alt="Profile" class="profile-pic profile-sty">
+                                <img src="/img/profile.png"
+                                     alt="Profile"
+                                     class="profile-pic profile-sty">
                             </div>
-
                             <div>
-                                <h6 id="modalNickname" class="mb-0 font-weight-bold text-dark small"></h6>
+                                <h6 class="mb-0 font-weight-bold text-dark small"
+                                    th:text="${post.nickName}">
+                                </h6>
+
                                 <small class="text-muted d-flex align-items-center modal-music-info">
-                                    <i data-lucide="music" class="mr-1 text-primary modal-music-icon"></i>
-                                    <span id="modalMusic" class="text-truncate modal-music-text">라라랜드 - another day of sun</span>
+
+                                    <i data-lucide="music"
+                                       class="mr-1 text-primary modal-music-icon">
+                                    </i>
+
+                                    <span class="text-truncate modal-music-text"
+                                          th:text="${post.musicUrl != null
+                                            ? post.musicUrl
+                                            : ''}">
+                                    </span>
+
                                 </small>
+
                             </div>
+
                         </div>
 
-                        <div id="modalPlaceInfo" class="d-none modal-place-info polygon">
+                        <div th:if="${(post.cityName != null and post.cityName != '')
+                            or (post.placeName != null and post.placeName != '' )
+                            or (post.atmosphere != null and post.atmosphere != '')}"
+                             class="modal-place-info polygon">
+
                             <div class="h-100 d-flex flex-column justify-content-center pl-5 pr-3">
-                                <div class="d-flex align-items-center">
+                                <div class="d-flex align-items-center"
+                                     th:if="${post.cityName != null and post.cityName != ''}">
                                     <i data-lucide="map-pin" class="text-primary mr-1 modal-pin-icon"></i>
-                                    <strong id="modalCityName" class="small text-primary text-truncate"></strong>
+                                    <p th:text="${post.cityName}"
+                                       class="small text-primary"></p>
                                 </div>
-                                <div id="modalPlaceName" class="text-primary text-truncate ml-3 modal-place-name"></div>
-                                <div id="modalAtmosphere" class="text-muted text-truncate ml-3 modal-atmosphere"></div>
+                                <div class="text-primary text-truncate ml-3"
+                                     th:text="${post.placeName}">
+                                </div>
+                                <div class="text-muted text-truncate ml-3"
+                                     th:text="${post.atmosphere}">
+                                </div>
                             </div>
+
                         </div>
 
-                        <button id="closeModal" type="button" class="close-ticket m-2" data-dismiss="modal">
+                        <button type="button"
+                                class="close-ticket position-absolute"
+                                data-dismiss="modal">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
+                    <div class="title d-flex justify-content-start align-items-center ml-4">
+                        <div th:text="${post.nickName}"  class=" title-text font-weight-bold"></div>
+                        <div th:text="${post.contents}"  class="ml-3 title-text font-weight-bold">미리 크리스마스</div>
+                    </div>
+                    <div class="comment-list-container flex-grow-1 overflow-auto p-3 custom-scroll bg-light"
+                         id="commentListContainer">
 
-                    <div id="modalCommentList" class="flex-grow-1 overflow-auto p-3 custom-scroll bg-light">
+                        <div th:if="${post.commentList == null or #lists.isEmpty(post.commentList)}"
+                             class="text-center text-muted small py-4">
+                            아직 댓글이 없습니다. 첫 댓글을 남겨보세요!
+                        </div>
+
+                        <div th:each="comment : ${post.commentList}" class="comment-row d-flex align-items-start mb-2 ml-3">
+                            <span th:text="${comment.nickName}" class="comment-text font-weight-bold mr-2 text-dark"></span>
+                            <span th:text="${comment.comment}" class="comment-text text-secondary"></span>
+                        </div>
+
                     </div>
 
                     <div class="px-3 py-2 border-top bg-white d-flex align-items-center flex-shrink-0">
-                        <button type="button" id="modalLikeBtn" class="btn btn-link text-dark p-0 mr-3 text-decoration-none d-flex align-items-center">
-                            <i id="modalLikeIcon" class="bi bi-heart h5 mb-0 mr-1 text-danger"></i>
-                            <span id="modalLikeCount" class="small font-weight-bold">0</span>
+
+                        <button type="button"
+                                class="btn btn-link text-dark p-0 mr-2 text-decoration-none d-flex align-items-center">
+                            <i th:if="${post.isLike}"
+                               class="bi bi-heart-fill text-danger btn-like-icon unlike-btn"
+                               th:data-post-id="${post.id}"></i>
+
+                            <i th:unless="${post.isLike}"
+                               class="bi bi-heart text-dark btn-like-icon icon-stroke-thick like-btn"
+                               th:data-post-id="${post.id}"></i>
+
                         </button>
-                        <button type="button" class="btn btn-link text-dark p-0 mr-3 text-decoration-none d-flex align-items-center">
-                            <i class="bi bi-share h5 mb-0 mr-1"></i>
-                            <span class="small font-weight-bold">0</span>
-                        </button>
-                        <button type="button" class="btn btn-link text-dark p-0 mr-3 text-decoration-none d-flex align-items-center">
-                            <i class="bi bi-send h5 mb-0 mr-1"></i>
-                            <span class="small font-weight-bold">0</span>
-                        </button>
-                        <button type="button" class="btn btn-link text-dark p-0 text-decoration-none d-flex align-items-center ml-auto">
-                            <i class="bi bi-bookmark h5 mb-0"></i>
-                        </button>
+                        <span class=" small font-weight-bold" th:text="${post.likeCount}">0</span>
+
                     </div>
 
 
                     <div class="p-2 border-top bg-white flex-shrink-0">
+
                         <div class="d-flex align-items-center">
-                            <input type="hidden" id="modalPostId">
+
+                            <input type="hidden" id="modalPostId" th:value="${post.id}">
+
                             <div class="modal-input-profile-wrap">
-                                <img th:src="${session.userProfileImg != null ? session.userProfileImg : '/img/profile.png'}" alt="Profile" class="profile-pic profile-sty">
+                                <img th:src="${session.userProfileImg != null ? session.userProfileImg : '/img/profile.png'}"
+                                     alt="Profile" class="profile-pic profile-sty">
                             </div>
 
-                            <div class="flex-grow-1 bg-light border rounded-pill px-3 py-1 d-flex d-flex align-items-center justify-content-center">
-                                <input type="text" id="commentInput" placeholder="당신의 흔적을 남겨보세요..." class="col-10 form-control-plaintext form-control-sm p-1 shadow-none modal-comment-input">
 
-                                <div id="replyIndicator" class="col-2 d-none d-flex justify-content-between align-items-center">
-                                    <span id="replyTargetName" class="text-primary font-weight-bold reply-target-name"></span>
-                                    <button type="button" onclick="cancelReplyMode()" class="btn btn-sm btn-link text-muted p-0 border-0 reply-cancel-btn">취소</button>
-                                </div>
-
+                            <div class="flex-grow-1 bg-light border rounded-pill px-3 py-1">
+                                <input type="text" id="commentInput"
+                                       placeholder="당신의 흔적을 남겨보세요..." class="form-control-plaintext form-control-sm p-1 shadow-none modal-comment-input">
                             </div>
 
-                            <button id="btnCommentSubmit" class="btn btn-link text-primary font-weight-bold text-decoration-none m-2  flex-shrink-0 modal-submit-btn">게시</button>
+                            <button id="btnCommentSubmit" class="btn btn-link text-primary font-weight-bold text-decoration-none m-2">
+                                게시
+                            </button>
+
                         </div>
+
                     </div>
 
                     <div class="blue flex-shrink-0 line"></div>
+
                 </div>
 
             </div>
+
         </div>
     </div>
+
 </div>

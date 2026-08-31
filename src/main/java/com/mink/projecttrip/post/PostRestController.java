@@ -1,10 +1,12 @@
 package com.mink.projecttrip.post;
 
 import com.mink.projecttrip.common.dto.ApiResponse;
+import com.mink.projecttrip.post.dto.PostDetail;
 import com.mink.projecttrip.post.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -75,4 +77,5 @@ public class PostRestController {
         }
 
     }
+
 }

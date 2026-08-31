@@ -1,5 +1,6 @@
 package com.mink.projecttrip.post.dto;
 
+import com.mink.projecttrip.comment.dto.CommentDetail;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -27,6 +28,9 @@ public class PostDetail {
     private LocalDateTime createdAt;
     private List<PostImageDetail> imageList;
 
+    private List<CommentDetail> commentList;
+
+    private int commentCount;
     private int likeCount;
     private boolean isLike;
 

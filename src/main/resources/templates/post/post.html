@@ -22,12 +22,12 @@
                 </div>
             </div>
         </div>
-        <div th:if="${(post.placeName != null and post.placeName != '') or (post.cityName != null and post.cityName != '' and post.cityName != 'null') or (post.atmosphere != null and post.atmosphere != '')}"
+        <div th:if="${(post.placeName != null and post.placeName != '') or (post.cityName != null and post.cityName != '') or (post.atmosphere != null and post.atmosphere != '')}"
              class="absolute right-0 top-0 h-full w-1/2 bg-blue-50 border-l border-b border-blue-200 polygon">
             <div class="h-full flex flex-col justify-center pl-12 pr-4">
                 <div class="space-y-1 gap-1.5">
                     <div class="flex gap-1.5"
-                         th:if="${post.cityName != null and post.cityName != '' and post.cityName != 'null'}">
+                         th:if="${post.cityName != null and post.cityName != ''}">
                         <i data-lucide="map-pin" class="w-5 h-5 text-blue-600"></i>
                         <p th:text="${post.cityName}"
                            class="font-bold text-blue-900 text-sm"></p>
@@ -85,14 +85,15 @@
                        class="bi bi-heart text-dark btn-like-icon icon-stroke-thick like-btn"
                        th:data-post-id="${post.id}"></i>
 
-                    <span class="count-text" th:text="${post.likeCount != null ? post.likeCount : 0}">0</span>
                 </button>
+                <span class="count-text" th:text="${post.likeCount != null ? post.likeCount : 0}">0</span>
 
                 <button type="button" class="open-post-detail ml-2"
                         th:data-post-id="${post.id}">
                     <i class="bi bi-chat text-dark btn-like-icon icon-stroke-thick"></i>
-                    <span class="count-text">0</span>
                 </button>
+                <span class="count-text"
+                      th:text="${post.commentCount != null ? post.commentCount : 0}">0</span>
 
                 <button type="button" class="ml-3">
                     <i class="bi bi-share text-dark btn-like-icon icon-stroke-thick"></i>

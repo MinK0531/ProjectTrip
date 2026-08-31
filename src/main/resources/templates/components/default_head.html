@@ -579,7 +579,9 @@
         let formData = new FormData();
         formData.append("contents", contents);
         formData.append("countryId", countryId);
-        formData.append("cityName", cityName);
+        if (cityName) {
+            formData.append("cityName", cityName);
+        }
         formData.append("musicUrl", musicUrl);
         formData.append("placeName", placeName);
         formData.append("atmosphere", atmosphere);
@@ -723,7 +725,9 @@
 
         let formData = new FormData();
         formData.append("countryId", countryId);
-        formData.append("cityName", cityName);
+        if (cityName) {
+            formData.append("cityName", cityName);
+        }
         formData.append("period", period);
         formData.append("startDate", startDate);
         formData.append("endDate", endDate);

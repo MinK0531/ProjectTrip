@@ -1,6 +1,8 @@
 package com.mink.projecttrip.post.service;
 
 import com.mink.projecttrip.city.service.CityService;
+import com.mink.projecttrip.comment.dto.CommentDetail;
+import com.mink.projecttrip.comment.service.CommentService;
 import com.mink.projecttrip.common.FileManager;
 import com.mink.projecttrip.country.domain.Country;
 import com.mink.projecttrip.country.repository.CountryRepository;
@@ -34,7 +36,7 @@ public class PostService {
     private final UserService userService;
     private final CountryRepository countryRepository;
     private final LikeService likeService;
-
+    private final CommentService commentService;
     @Transactional
     public boolean createPost(long userId,
                               long countryId,
@@ -107,6 +109,7 @@ public class PostService {
 
             int likeCount = likeService.countByPostId(post.getId());
             boolean isLike = likeService.isLikeByPostIdAndUserId(post.getId(), userId);
+            List<CommentDetail> commentList = commentService.getCommentList(post.getId(),userId);
 
             List<PostImage> images = postImageRepository
                     .findAllByPostIdOrderBySortOrderAsc(
@@ -140,12 +143,64 @@ public class PostService {
                     .longitude(post.getLongitude())
                     .createdAt(post.getCreatedAt())
                     .imageList(imageList)
+                    .commentCount(commentList.size())
                     .likeCount(likeCount)
                     .isLike(isLike)
                     .build();
             feedList.add(postDetail);
         }
         return feedList;
+    }
+    @Transactional
+    public PostDetail getPostDetail(long postId, long userId) {
+
+        Optional<Post> optionalPost = postRepository.findById(postId);
+
+        if (optionalPost.isEmpty()) {
+            return null;
+        }
+
+        Post post = optionalPost.get();
+
+        User user = userService.getUserById(post.getUserId());
+
+        int likeCount = likeService.countByPostId(postId);
+        boolean isLike = likeService.isLikeByPostIdAndUserId(postId, userId);
+        List<CommentDetail> commentList = commentService.getCommentList(post.getId(),userId);
+
+        List<PostImage> images = postImageRepository.findAllByPostIdOrderBySortOrderAsc(postId);
+
+        List<PostImageDetail> imageList = images.stream()
+                .map(image -> PostImageDetail.builder()
+                        .id(image.getId())
+                        .imagePath(image.getImagePath())
+                        .sortOrder(image.getSortOrder())
+                        .build())
+                .toList();
+
+        String countryName = countryRepository.findById(post.getCountryId())
+                        .map(Country::getCountryNameKo)
+                        .orElse("알 수 없는 나라");
+
+        return PostDetail.builder()
+                .id(post.getId())
+                .userId(post.getUserId())
+                .countryId(post.getCountryId())
+                .nickName(user.getNickName())
+                .countryName(countryName)
+                .cityName(post.getCityName())
+                .contents(post.getContents())
+                .atmosphere(post.getAtmosphere())
+                .placeName(post.getPlaceName())
+                .musicUrl(post.getMusicUrl())
+                .latitude(post.getLatitude())
+                .longitude(post.getLongitude())
+                .createdAt(post.getCreatedAt())
+                .imageList(imageList)
+                .commentList(commentList)
+                .likeCount(likeCount)
+                .isLike(isLike)
+                .build();
     }
 
     @Transactional
@@ -161,6 +216,7 @@ public class PostService {
                 }
 
                 likeService.deleteLikeByPostId(post.getId());
+                commentService.deleteCommentByPostId(post.getId());
 
                 List<PostImage> imageList =
                         postImageRepository.findAllByPostIdOrderBySortOrderAsc(postId);
