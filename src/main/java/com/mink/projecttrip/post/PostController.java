@@ -24,11 +24,26 @@ public class PostController {
 
         long userId = (Long) session.getAttribute("userId");
 
-        PostDetail post =
-                postService.getPostDetail(postId, userId);
+        PostDetail post = postService.getPostDetail(postId, userId);
 
         model.addAttribute("post", post);
 
         return "post/post_card :: postDetail";
+    }
+    @GetMapping("/modify-modal")
+    public String modifyModal(
+            @RequestParam long postId,
+            HttpSession session,
+            Model model) {
+
+        long userId = (Long) session.getAttribute("userId");
+
+        PostDetail post = postService.getPostDetail(postId, userId);
+        model.addAttribute("post", post);
+
+        if (post == null || post.getUserId() != userId) {
+            throw new IllegalArgumentException("수정 권한이 없거나 존재하지 않는 게시물");
+        }
+        return "post/post_modify :: modifyPostModal";
     }
 }

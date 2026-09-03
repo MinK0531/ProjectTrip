@@ -19,6 +19,7 @@ public class CommentService {
     final CommentRepository commentRepository;
     final UserService userService;
 
+
     public List<CommentDetail> getCommentList(long postId ,long userId) {
         List<Comment> commentList = commentRepository.findByPostId(postId);
         List<CommentDetail> commentDetailList = new ArrayList<>();
@@ -34,6 +35,8 @@ public class CommentService {
         }
         return commentDetailList;
     }
+
+    @Transactional
     public boolean createComment(long postId, long userId, String comments){
 
         Comment comment = Comment.builder()
@@ -45,7 +48,6 @@ public class CommentService {
         try{
             commentRepository.save(comment);
         }catch (DataAccessException e){
-            e.printStackTrace();
             return false;
         }
         return true;
@@ -53,5 +55,22 @@ public class CommentService {
     @Transactional
     public void deleteCommentByPostId(long postId) {
         commentRepository.deleteByPostId(postId);
+    }
+
+    @Transactional
+    public boolean deleteComment(long commentId, long userId){
+        Comment comment = commentRepository.findById(commentId).orElse(null);
+
+        if(comment == null){
+            return false;
+        }
+
+        if(comment.getUserId() != userId){
+            return false;
+        }
+
+        commentRepository.delete(comment);
+        return true;
+
     }
 }

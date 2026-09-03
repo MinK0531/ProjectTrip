@@ -142,9 +142,19 @@
                         </div>
 
                         <div th:each="comment : ${post.commentList}" class="comment-row d-flex align-items-start mb-2 ml-3">
-                            <span th:text="${comment.nickName}" class="comment-text font-weight-bold mr-2 text-dark"></span>
-                            <span th:text="${comment.comment}" class="comment-text text-secondary"></span>
+                            <div class=" col-9">
+                                <span th:text="${comment.nickName}" class="comment-text font-weight-bold mr-2 text-dark"></span>
+                                <span th:text="${comment.comment}" class="comment-text text-secondary"></span>
+                            </div>
+                            <button th:if="${comment.userId == session.userId}"
+                                    type="button"
+                                    class="btn btn-link text-danger p-0 ml-auto comment-delete-btn"
+                                    th:data-comment-id="${comment.id}"
+                                    title="댓글 삭제">
+                                <i data-lucide="trash-2" class="comment-delete-icon"></i>
+                            </button>
                         </div>
+
 
                     </div>
 
@@ -186,18 +196,11 @@
                             <button id="btnCommentSubmit" class="btn btn-link text-primary font-weight-bold text-decoration-none m-2">
                                 게시
                             </button>
-
                         </div>
-
                     </div>
-
                     <div class="blue flex-shrink-0 line"></div>
-
                 </div>
-
             </div>
-
         </div>
     </div>
-
 </div>

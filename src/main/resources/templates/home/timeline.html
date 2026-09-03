@@ -68,6 +68,27 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script>
+
+
+        $(document).on("click", ".comment-delete-btn", function () {
+
+            const commentId = $(this).data("comment-id");
+
+            $.ajax({
+                url: "/comment/remove",
+                type: "DELETE",
+                data: {commentId: commentId},
+                success: function (response) {
+                    if (response.result === "success") {
+                        location.reload();
+                    } else {
+                        alert("댓글 삭제 실패");
+                    }
+                }, error: function () {
+                    alert("댓글 삭제 에러");
+                }
+            });
+        });
         function adjustVerticalLocationFontSize() {
             const el = document.getElementById("verticalLocation");
 
@@ -179,6 +200,7 @@
             });
         });
 
+
         $(".delete-wishlist-btn").on("click",function (){
             let wishlistId = $(this).data("wishlist-id");
 
@@ -283,6 +305,30 @@
                     }
                 },error: function (){
                     alert("좋아요 취소 에러");
+                }
+            });
+        });
+
+        $(document).on("click", ".edit-post-btn", function () {
+            let postId = $(this).data("post-id");
+
+            $("#moreModal").modal("hide");
+
+            $.ajax({
+                type: "GET",
+                url: "/post/modify-modal",
+                data: { postId: postId },
+                success: function (response) {
+                    $("#postModifyModal").remove();
+                    $("body").append(response);
+
+                    $("#modifyPostId").val(postId);
+                    $("#postModifyModal").modal("show");
+
+                    lucide.createIcons();
+                },
+                error: function () {
+                    alert("게시물 정보를 불러오는데 실패했습니다.");
                 }
             });
         });

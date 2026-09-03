@@ -214,13 +214,11 @@ public class PostService {
                 if(post.getUserId() != userId){
                     return false;
                 }
-
                 likeService.deleteLikeByPostId(post.getId());
                 commentService.deleteCommentByPostId(post.getId());
 
                 List<PostImage> imageList =
                         postImageRepository.findAllByPostIdOrderBySortOrderAsc(postId);
-
                 for (PostImage image : imageList) {
                     if (image.getImagePath() != null) {
                         FileManager.removeFile(image.getImagePath());
@@ -232,6 +230,51 @@ public class PostService {
             }
         }else{
             return false;
+        }
+        return true;
+    }
+
+    @Transactional
+    public boolean updatePost(
+            long userId,
+            long postId,
+            String contents,
+            String cityName,
+            String placeName,
+            String atmosphere,
+            String musicUrl,
+            List<Long> deleteImageIds
+    ) {
+
+        Optional<Post> optionalPost = postRepository.findById(postId);
+
+        if (optionalPost.isEmpty()) {
+            return false;
+        }
+        Post post = optionalPost.get();
+
+        if (post.getUserId() != userId) {
+            return false;
+        }
+
+        post.setContents(contents);
+        post.setCityName(cityName);
+        post.setPlaceName(placeName);
+        post.setAtmosphere(atmosphere);
+        post.setMusicUrl(musicUrl);
+
+        if (deleteImageIds != null) {
+            for (Long imageId : deleteImageIds) {
+                Optional<PostImage> optionalImage = postImageRepository.findById(imageId);
+                if (optionalImage.isPresent()) {
+                    PostImage image = optionalImage.get();
+                    if (image.getPostId() != postId) {
+                        continue;
+                    }
+                    FileManager.removeFile(image.getImagePath());
+                    postImageRepository.delete(image);
+                }
+            }
         }
         return true;
     }

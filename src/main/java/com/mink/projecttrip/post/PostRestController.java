@@ -78,4 +78,35 @@ public class PostRestController {
 
     }
 
+    @PutMapping("/modify")
+    public ApiResponse<Void> modify(
+            @RequestParam long postId,
+            @RequestParam String contents,
+            @RequestParam(required = false) String cityName,
+            @RequestParam(required = false) String placeName,
+            @RequestParam(required = false) String atmosphere,
+            @RequestParam(required = false) String musicUrl,
+            @RequestParam(required = false) List<Long> deleteImageIds,
+            HttpServletRequest request) {
+
+        HttpSession session = request.getSession();
+        if (session == null || session.getAttribute("userId") == null) {
+            return ApiResponse.fail("로그인이 필요합니다.");
+        }
+        long userId = (Long) session.getAttribute("userId");
+
+        if(postService.updatePost(
+                userId,
+                postId,
+                contents,
+                cityName,
+                placeName,
+                atmosphere,
+                musicUrl,
+                deleteImageIds)){
+            return ApiResponse.success("수정 성공");
+        }else{
+            return ApiResponse.fail("수정 실패");
+        }
+    }
 }

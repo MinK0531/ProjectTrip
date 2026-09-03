@@ -4,10 +4,7 @@ import com.mink.projecttrip.comment.service.CommentService;
 import com.mink.projecttrip.common.dto.ApiResponse;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -30,6 +27,23 @@ public class CommentRestController {
             return ApiResponse.success("댓글 성공");
         }else{
             return ApiResponse.fail("댓글 실패");
+        }
+    }
+
+    @DeleteMapping("/remove")
+    public ApiResponse<Void> deleteComment(
+            @RequestParam long commentId
+            , HttpSession session){
+
+        if(session == null || session.getAttribute("userId") == null){
+            return ApiResponse.fail("로그인이 필요합니다.");
+        }
+        long userId = (Long) session.getAttribute("userId");
+
+        if(commentService.deleteComment(commentId, userId)){
+            return ApiResponse.success("댓글 삭제 성공");
+        }else{
+            return ApiResponse.fail("댓글 삭제 실패");
         }
     }
 

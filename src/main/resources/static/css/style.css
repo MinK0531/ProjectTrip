@@ -323,16 +323,21 @@ main {
 }
 .btn-choice:last-child { margin-bottom: 0; }
 
-/* Ticket Post Modal Layout*/
-.top-stripe-head { width: 370px; }
-.top-stripe-head img { width: 100%; object-fit: cover; }
+
+.top-stripe-head {
+    width: 370px;
+}
+.top-stripe-head img {
+    width: 100%;
+    object-fit: cover;
+}
 
 #postCreateModal .modal-dialog {
     max-width: 1200px;
     margin: 1.75rem auto;
 }
 
-/* 티켓 외곽 구멍 효과 */
+
 .ticket-wrapper::before, .ticket-wrapper::after,
 .ticket-main::before, .ticket-main::after,
 .ticket-stub::before, .ticket-stub::after {
@@ -1527,4 +1532,79 @@ main {
 .comment-text{
     font-size: 15px;
     color: #212529;
+}
+
+.comment-delete-btn {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #a0a0a0 !important;
+    text-decoration: none !important;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.comment-delete-btn:hover {
+    color: #dc3545 !important;
+    transform: scale(1.08);
+}
+
+.comment-delete-btn:active {
+    transform: scale(0.95);
+}
+
+#postModifyModal .modal-dialog {
+    max-width: 1200px;
+    margin: 1.75rem auto;
+}
+
+.existing-image-slide {
+    position: relative !important;
+}
+
+.remove-existing-image {
+    position: absolute !important;
+    top: 10px !important;
+    right: 10px !important;
+    z-index: 100 !important;
+    width: 28px !important;
+    height: 28px !important;
+    background-color: rgba(0, 0, 0, 0.6) !important;
+    color: #ffffff !important;
+    border: none !important;
+    border-radius: 50% !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.remove-existing-image:hover {
+    background-color: rgba(255, 0, 0, 0.8) !important;
+}
+
+#swiper-wrapper-box-modify,
+.post-swiper-modify {
+    width: 100%;
+    height: 100%;
+    min-height: 300px;
+}
+
+.existing-image-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.top-stripe {
+    height: 26px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
 }
