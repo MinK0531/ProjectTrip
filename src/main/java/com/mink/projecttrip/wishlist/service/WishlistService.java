@@ -8,6 +8,7 @@ import com.mink.projecttrip.user.domain.User;
 import com.mink.projecttrip.user.service.UserService;
 import com.mink.projecttrip.wishlist.domain.Wishlist;
 import com.mink.projecttrip.wishlist.dto.WishlistDetail;
+import com.mink.projecttrip.wishlist.dto.WishlistMapPoint;
 import com.mink.projecttrip.wishlist.repository.WishlistRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -92,6 +93,33 @@ public class WishlistService {
         }
         return feedList;
     }
+    @Transactional
+    public WishlistDetail getWishlistDetail(long wishlistId, long userId){
+        Optional<Wishlist> optionalWishlist = wishlistRepository.findById(wishlistId);
+        if(optionalWishlist.isEmpty()){
+            return null;
+        }
+        Wishlist wishlist = optionalWishlist.get();
+
+        if (wishlist.getUserId() != userId) {
+            return null;
+        }
+
+        String countryName = countryRepository.findById(wishlist.getCountryId())
+                .map(Country::getCountryNameKo)
+                .orElse("알 수 없는 나라");
+        return WishlistDetail.builder()
+                .id(wishlist.getId())
+                .countryId(wishlist.getCountryId())
+                .countryName(countryName)
+                .cityName(wishlist.getCityName())
+                .period(wishlist.getPeriod())
+                .startDate(wishlist.getStartDate())
+                .endDate(wishlist.getEndDate())
+                .memo(wishlist.getMemo())
+                .build();
+    }
+
 
     @Transactional
     public boolean deleteWishlist(long userId, long wishlistId) {
@@ -112,6 +140,57 @@ public class WishlistService {
             return false;
         }
         return true;
+    }
+    @Transactional
+    public boolean updateWishlist(
+            long userId,
+            long wishlistId,
+            String cityName,
+            String startDate,
+            String endDate,
+            String memo){
+        Optional<Wishlist> optionalWishlist = wishlistRepository.findById(wishlistId);
+        if(optionalWishlist.isEmpty()){
+            return false;
+        }
+        Wishlist wishlist = optionalWishlist.get();
+        if(wishlist.getUserId() != userId){
+            return false;
+        }
+        wishlist.setCityName(cityName);
+        wishlist.setStartDate(startDate == null || startDate.isBlank() ? null : LocalDate.parse(startDate));
+        wishlist.setEndDate(endDate == null || endDate.isBlank() ? null : LocalDate.parse(endDate));
+        wishlist.setMemo(memo);
+        return true;
+    }
+
+    @Transactional
+    public List<WishlistMapPoint> getMyWishlistPoint(long userId) {
+        List<Wishlist> wishlistList = wishlistRepository.findByUserIdOrderByIdDesc(userId);
+
+        List<WishlistMapPoint> pointList = new ArrayList<>();
+
+        for(Wishlist wishlist : wishlistList){
+            if(wishlist.getLatitude()== 0 && wishlist.getLongitude()== 0){
+                continue;
+            }
+            String countryName = countryRepository.findById(wishlist.getCountryId())
+                    .map(Country::getCountryNameKo)
+                    .orElse("알 수 없는 나라");
+
+            pointList.add(
+                    WishlistMapPoint.builder()
+                            .wishlistId(wishlist.getId())
+                            .latitude(wishlist.getLatitude())
+                            .longitude(wishlist.getLongitude())
+                            .cityName(wishlist.getCityName())
+                            .countryName(countryName)
+                            .build()
+
+            );
+        }
+        return pointList;
+
     }
 
 

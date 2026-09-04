@@ -41,9 +41,6 @@ public class PostController {
         PostDetail post = postService.getPostDetail(postId, userId);
         model.addAttribute("post", post);
 
-        if (post == null || post.getUserId() != userId) {
-            throw new IllegalArgumentException("수정 권한이 없거나 존재하지 않는 게시물");
-        }
         return "post/post_modify :: modifyPostModal";
     }
 }

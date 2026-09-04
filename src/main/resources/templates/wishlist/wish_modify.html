@@ -1,0 +1,145 @@
+<div class="modal fade" id="wishModifyModal" tabindex="-1" role="dialog"
+      aria-hidden="true" th:fragment="modifyWishModal">
+
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content p-4">
+            <div class="flex justify-between items-center mb-3">
+                <h5 id="wishModalTitleModify" class="font-weight-bold mb-0">위시리스트 수정</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <input type="hidden" id="modifyWishId" th:value="${wish.id}">
+
+            <label class="ticket-label">나라</label>
+            <select id="wishCountryIdModify" class="wish-input-modify" th:data-selected-id="${wish.countryId}">
+                <option value="" disabled selected>나라를 선택하세요</option>
+            </select>
+
+            <label class="ticket-label">도시 (선택)</label>
+            <select id="wishCityNameModify" class="wish-input-modify"
+                    th:data-selected-name="${wish.cityName}"
+                    th:disabled="${wish.countryId == null}">
+                <option value="" disabled selected>도시명</option>
+            </select>
+
+            <label class="ticket-label">희망 시기</label>
+            <input type="text" id="wishPeriodModify" th:value="${wish.period}" class="wish-input-modify" placeholder="언제 가고 싶나요?">
+
+            <label class="ticket-label">희망 날짜 범위 선택 (선택)</label>
+            <div class="wish-date-container">
+                <input type="date" id="wishStartDateModify" th:value="${wish.startDate}" class="wish-input-modify">
+                <input type="date" id="wishEndDateModify" th:value="${wish.endDate}" class="wish-input-modify">
+            </div>
+
+            <label class="ticket-label">메모 (선택)</label>
+            <textarea id="wishMemoModify" th:text="${wish.memo}" class="wish-input-modify" rows="3"></textarea>
+
+
+            <div class="wish-footer mt-4 flex justify-end gap-2">
+                <button type="button" class="btn btn-light border" data-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-primary px-4" id="wishModifySubmitBtn">저장</button>
+            </div>
+        </div>
+    </div>
+    <script th:inline="javascript">
+        $(document).ready(function() {
+            const selectedCountryId  = $('#wishCountryIdModify').data('selected-id');
+            const selectedCityName  = $('#wishCityNameModify').data('selected-name');
+
+            $.ajax({
+                type:'GET',
+                url: '/country/list',
+                success: function (response) {
+                    const $countrySelect = $('#wishCountryIdModify');
+                    response.forEach(function (country) {
+                        const isSelected = country.id == selectedCountryId;
+                        $countrySelect.append(
+                            $('<option>', {
+                                value: country.id,
+                                text: country.countryNameKo + ' (' + country.countryNameEn + ')',
+                                'data-country-code': country.countryCode,
+                                selected: isSelected
+                            })
+                        );
+                    });
+
+                    if (selectedCountryId) {
+                        loadCities(selectedCityName);
+                    }
+                }
+            });
+
+            $('#wishCountryIdModify').on('change', function () {
+                alert('나라는 수정할 수 없습니다.');
+                $(this).val(selectedCountryId);
+
+            });
+
+            function loadCities(targetCityName) {
+                const countryCode = $('#wishCountryIdModify').find(':selected').data('country-code');
+                const $citySelect = $('#wishCityNameModify');
+                $citySelect.empty().prop('disabled', false);
+
+                if (!countryCode) return;
+
+                $.ajax({
+                    type: 'POST',
+                    url: '/city/list',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ countryCode: countryCode }),
+                    success: function (response) {
+                        $citySelect.append('<option value="" disabled selected>도시명</option>');
+                        response.forEach(function (city) {
+                            const isSelected = city === targetCityName;
+                            $citySelect.append(
+                                $('<option>', {
+                                    value: city,
+                                    text: city,
+                                    selected: isSelected
+                                })
+                            );
+                        });
+                    }
+                });
+            }
+        });
+        $('#wishPeriodModify').on('click', function () {
+            alert('기간은 수정할 수 없습니다.');
+        });
+        $('#wishModifySubmitBtn').on("click",function (){
+            const wishId = $('#modifyWishId').val();
+            const cityName = $('#wishCityNameModify').val();
+            const start = $('#wishStartDateModify').val();
+            const end = $('#wishEndDateModify').val();
+            const memo = $('#wishMemoModify').val();
+
+
+
+            const formData = new FormData();
+            formData.append("wishlistId", wishId);
+            formData.append("cityName", cityName);
+            formData.append("startDate", start);
+            formData.append("endDate", end);
+            formData.append("memo", memo);
+
+            $.ajax({
+                type:"PUT",
+                url:"/wishlist/modify",
+                data:formData,
+                processData: false,
+                contentType: false,
+                success:function (response){
+                    if(response.result === 'success'){
+                        location.reload();
+                    }else{
+                        alert("위시리스트 수정 실패");
+                    }
+                },error:function (){
+                    alert("위시리스트 수정 에러");
+                }
+            });
+        });
+    </script>
+</div>
+
+

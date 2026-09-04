@@ -110,16 +110,16 @@
 
                 root.setThemes([am5themes_Animated.new(root)]);
 
-                var chart = root.container.children.push(
+                const chart = root.container.children.push(
                     am5map.MapChart.new(root, {
                         panX: "rotateX",
-                        panY: "translateY",
+                        panY: "rotateY",
                         boxZoom: "shift",
-                        projection: am5map.geoMercator(),
-                        homeGeoPoint: {
-                            latitude: 2,
-                            longitude: 2
-                        }
+                        projection: am5map.geoOrthographic(),
+                        paddingBottom: 20,
+                        paddingTop: 20,
+                        paddingLeft: 20,
+                        paddingRight: 20
 
                     })
                 )
@@ -155,7 +155,7 @@
                 cont.children.push(
                     am5.Label.new(root, {
                         centerY: am5.p50,
-                        text: "Map"
+                        text: "Globe"
                     })
                 );
                 var switchButton = cont.children.push(
@@ -170,24 +170,11 @@
                 cont.children.push(
                     am5.Label.new(root, {
                         centerY: am5.p50,
-                        text: "Globe"
+                        text: "Map"
                     })
                 );
                 switchButton.on("active", function () {
                     if (!switchButton.get("active")) {
-                        chart.set(
-                            "projection",
-                            am5map.geoMercator()
-                        );
-                        chart.set(
-                            "panY",
-                            "translateY"
-                        );
-                        chart.set(
-                            "rotationY",
-                            0);
-
-                    } else {
                         chart.set(
                             "projection",
                             am5map.geoOrthographic()
@@ -200,6 +187,20 @@
                             "fillOpacity",
                             0.1
                         );
+
+                    } else {
+
+                        chart.set(
+                            "projection",
+                            am5map.geoMercator()
+                        );
+                        chart.set(
+                            "panY",
+                            "translateY"
+                        );
+                        chart.set(
+                            "rotationY",
+                            0);
                     }
                 });
 
@@ -246,6 +247,74 @@
                       }
                   }
                 );
+                const wishPointSeries = chart.series.push(
+                  am5map.MapPointSeries.new(root,{
+                      latitudeField: "latitude",
+                      longitudeField: "longitude"
+                  })
+                );
+
+                wishPointSeries.bullets.push(function (){
+                   const container = am5.Container.new(root,{
+                       cursorOverStyle:"pointer"
+                    });
+                    const circle = am5.Circle.new(root,{
+                        radius:7,
+                        fill:am5.color(0xf296f2),
+                        stroke: am5.color(0xffffff),
+                        strokeWidth: 2,
+                        tooltipText: "❤️ {countryName} · {cityName}"
+                    });
+                    container.children.push(circle);
+                    return am5.Bullet.new(root, {
+                        sprite: container
+                    });
+                });
+                $.ajax({
+                    url:"/mypage/wishlist/point",
+                    type:"GET",
+                    dataType: "json",
+                    success:function (response){
+                        wishPointSeries.data.setAll(response.data);
+                    },error:function (){
+                        alert("위시리스트 위치 에러");
+                    }
+                })
+
+                const postPointSeries = chart.series.push(
+                    am5map.MapPointSeries.new(root,{
+                        latitudeField: "latitude",
+                        longitudeField: "longitude"
+                    })
+                );
+
+                postPointSeries.bullets.push(function (){
+                   const container = am5.Container.new(root,{
+                       cursorOverStyle:"pointer"
+                   });
+                   const circle = am5.Circle.new(root,{
+                      radius:7,
+                       fill:am5.color(0x9454d8),
+                       stroke: am5.color(0xffffff),
+                       strokeWidth: 2,
+                       tooltipText: "📍{countryName} · {cityName}"
+                   });
+                    container.children.push(circle);
+                    return am5.Bullet.new(root, {
+                        sprite: container
+                    });
+                });
+                $.ajax({
+                    url:"/mypage/post/point",
+                    type:"GET",
+                    dataType: "json",
+                    success:function (response){
+                        postPointSeries.data.setAll(response.data);
+                    },error:function (){
+                        alert("게시물 위치 에러");
+                    }
+                })
+
                 chart.animate({
                     key: "rotationX",
                     from: 0,
@@ -253,8 +322,10 @@
                     duration: 60000,
                     loops: Infinity
                 });
+
                 chart.appear(1000, 100);
             });
+
         }
     </script>
 </div>

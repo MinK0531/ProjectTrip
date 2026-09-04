@@ -1,10 +1,7 @@
 package com.mink.projecttrip.wishlist.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -17,6 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Table(name = "`wishlist`")
 @Entity
+@Setter
 public class Wishlist {
 
     @Id

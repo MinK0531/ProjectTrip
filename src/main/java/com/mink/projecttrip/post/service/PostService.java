@@ -11,6 +11,7 @@ import com.mink.projecttrip.post.domain.Post;
 import com.mink.projecttrip.post.domain.PostImage;
 import com.mink.projecttrip.post.dto.PostDetail;
 import com.mink.projecttrip.post.dto.PostImageDetail;
+import com.mink.projecttrip.post.dto.PostMapPoint;
 import com.mink.projecttrip.post.repository.PostImageRepository;
 import com.mink.projecttrip.post.repository.PostRepository;
 import com.mink.projecttrip.user.domain.User;
@@ -162,7 +163,7 @@ public class PostService {
 
         Post post = optionalPost.get();
 
-        User user = userService.getUserById(post.getUserId());
+        User user = userService.getUserById(userId);
 
         int likeCount = likeService.countByPostId(postId);
         boolean isLike = likeService.isLikeByPostIdAndUserId(postId, userId);
@@ -277,6 +278,34 @@ public class PostService {
             }
         }
         return true;
+    }
+
+    @Transactional
+    public List<PostMapPoint> getMyPostPoints(long userId){
+        List<Post> postList = postRepository.findByUserIdOrderByIdDesc(userId);
+
+        List<PostMapPoint> pointList = new ArrayList<>();
+
+        for(Post post : postList){
+
+            if(post.getLatitude() == 0 && post.getLongitude() == 0){
+                continue;
+            }
+            String countryName = countryRepository.findById(post.getCountryId())
+                    .map(Country::getCountryNameKo)
+                    .orElse("알 수 없는 나라");
+
+            pointList.add(
+                    PostMapPoint.builder()
+                            .postId(post.getId())
+                            .latitude(post.getLatitude())
+                            .longitude(post.getLongitude())
+                            .cityName(post.getCityName())
+                            .countryName(countryName)
+                            .build()
+            );
+        }
+        return pointList;
     }
 
 }

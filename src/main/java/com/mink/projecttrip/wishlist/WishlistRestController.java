@@ -61,5 +61,31 @@ public class WishlistRestController {
             return ApiResponse.fail("삭제 실패");
         }
     }
+    @PutMapping("/modify")
+    public ApiResponse<Void> modify(
+            @RequestParam long wishlistId,
+            @RequestParam(required = false) String cityName,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate,
+            @RequestParam(required = false) String memo,
+            HttpServletRequest request){
+        HttpSession session = request.getSession();
+        if (session == null || session.getAttribute("userId") == null) {
+            return ApiResponse.fail("로그인이 필요합니다.");
+        }
+        long userId = (Long) session.getAttribute("userId");
+
+        if(wishlistService.updateWishlist(
+                userId,
+                wishlistId,
+                cityName,
+                startDate,
+                endDate,
+                memo)){
+            return ApiResponse.success("수정 성공");
+        }else{
+            return ApiResponse.fail("수정 실패");
+        }
+    }
 }
 

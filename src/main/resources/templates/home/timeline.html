@@ -332,6 +332,29 @@
                 }
             });
         });
+        $(document).on("click", ".edit-wishlist-btn", function () {
+            let wishlistId = $(this).data("wishlist-id");
+
+            $("#moreModal").modal("hide");
+
+            $.ajax({
+                type: "GET",
+                url: "/wishlist/modify-wishlist",
+                data: { wishlistId: wishlistId },
+                success: function (response) {
+                    $("#wishModifyModal").remove();
+                    $("body").append(response);
+
+                    $("#modifyWishId").val(wishlistId);
+                    $("#wishModifyModal").modal("show");
+
+                    lucide.createIcons();
+                },
+                error: function () {
+                    alert("위시리스트 정보를 불러오는데 실패했습니다.");
+                }
+            });
+        });
     </script>
 </div>
 
