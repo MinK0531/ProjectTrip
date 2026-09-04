@@ -1,0 +1,182 @@
+<div th:fragment="profilePanel">
+
+    <div class="modal fade" id="profileEditModal" tabindex="-1" role="dialog"
+         aria-labelledby="profileEditModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content border-0" style="border-radius:16px;">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title font-weight-bold" id="profileEditModalLabel">프로필 편집</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body pt-0">
+
+                    <div class="text-center mb-3">
+                        <img id="profileImgPreview"
+                             src="/img/profile.png"
+                             alt="preview" class="profile-preview">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-bold mb-1">프로필 사진</label>
+                        <input type="file"
+                               class="form-control-file"
+                               id="profileImgInput"
+                               accept="image/*">
+                        <small class="text-muted">파일 업로드 방식이다</small>
+
+                        <button type="button" class="btn btn-sm btn-outline-danger mt-2 d-none" id="btnDeleteProfileImg">
+                            이미지 삭제
+                        </button>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="font-weight-bold mb-1">한마디</label>
+                        <textarea class="form-control" id="profileWordInput" rows="3" maxlength="200"
+                                  placeholder="프로필 한마디를 입력하라"></textarea>
+                        <small class="text-muted"><span id="profileWordCount">0</span>/200</small>
+                    </div>
+
+                    <div class="alert alert-danger d-none" id="profileEditError"></div>
+                </div>
+
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" id="btnSaveProfile">저장</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+
+        let deleteProfileImg = false;
+
+
+        $('#btnEditProfile').on('click', function () {
+
+            $.ajax({
+                url: "/user/profile",
+                type: "GET",
+
+                success: function (response) {
+
+                    if (response.result === "success") {
+
+                        const profile = response.data;
+
+                        $("#profileWordInput").val(profile.profileWord || "");
+
+                        $("#profileWordCount").text(
+                            $("#profileWordInput").val().length
+                        );
+
+                        deleteProfileImg = false;
+
+                        $("#profileImgInput").val("");
+
+                        if (profile.profileImg) {
+
+                            $("#profileImgPreview").attr("src", profile.profileImg);
+
+                            $("#btnDeleteProfileImg").removeClass("d-none");
+
+                        } else {
+
+                            $("#profileImgPreview").attr("src", "/img/profile.png");
+
+                            $("#btnDeleteProfileImg").addClass("d-none");
+                        }
+                        $("#profileEditModal").modal("show");
+                    } else {
+                        alert("프로필 조회 실패");
+                    }
+                },
+                error: function () {
+                    alert("프로필 조회 오류");
+                }
+            });
+        });
+
+
+        $("#profileWordInput").on("input", function () {
+
+            $("#profileWordCount").text(
+                $(this).val().length
+            );
+        });
+
+        $("#profileImgInput").on("change", function () {
+
+            const file = this.files[0];
+
+            if (!file) {
+                return;
+            }
+            deleteProfileImg = false;
+
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+
+                $("#profileImgPreview").attr("src", e.target.result);
+                $("#btnDeleteProfileImg").removeClass("d-none");
+            };
+            reader.readAsDataURL(file);
+        });
+
+        $("#btnDeleteProfileImg").on("click", function () {
+
+            deleteProfileImg = true;
+
+            $("#profileImgInput").val("");
+
+            $("#profileImgPreview").attr("src", "/img/profile.png");
+            $(this).addClass("d-none");
+        });
+
+
+        $("#btnSaveProfile").on("click", function () {
+
+            const formData = new FormData();
+
+            formData.append(
+                "profileWord",
+                $("#profileWordInput").val()
+            );
+
+            formData.append("deleteProfileImg", deleteProfileImg);
+
+            const file = $("#profileImgInput")[0].files[0];
+
+            if (file) {
+                formData.append("profileImg", file);
+            }
+
+            $.ajax({
+                url: "/user/profile-modify",
+                type: "PUT",
+                data: formData,
+                processData: false,
+                contentType: false,
+
+                success: function (response) {
+                    if (response.result === "success") {
+                        alert("프로필 수정 성공");
+                        $("#profileEditModal").modal("hide");
+                        location.reload();
+                    } else {
+                        alert("프로필 수정 실패");
+                    }
+                },
+
+                error: function () {
+                    alert("프로필 수정 오류");
+                }
+            });
+        });
+    </script>
+
+</div>

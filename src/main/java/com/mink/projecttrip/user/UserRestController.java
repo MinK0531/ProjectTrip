@@ -2,6 +2,8 @@ package com.mink.projecttrip.user;
 
 import com.mink.projecttrip.common.dto.ApiResponse;
 import com.mink.projecttrip.user.domain.User;
+import com.mink.projecttrip.user.dto.UserProfileDetail;
+import com.mink.projecttrip.user.service.UserProfileService;
 import com.mink.projecttrip.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -14,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 public class UserRestController {
 
     private final UserService userService;
+    private final UserProfileService userProfileService;
+
     @PostMapping("/signup-process")
     public ApiResponse<Void> signup(
             @RequestParam String nickName,
@@ -63,9 +67,14 @@ public class UserRestController {
             return ApiResponse.fail("로그인 실패");
         } else {
             HttpSession session = request.getSession();
+
             session.setAttribute("userId", user.getId());
             session.setAttribute("userNickName", user.getNickName());
             session.setAttribute("userCountryCode", user.getCountryCode());
+
+            UserProfileDetail profile = userProfileService.getMyProfile(user.getId());
+            session.setAttribute( "userProfileImg", profile.getProfileImg() != null ? profile.getProfileImg() : "/img/profile.png" );
+            session.setAttribute( "userProfileWord", profile.getProfileWord() );
 
             return ApiResponse.success("로그인 성공");
 

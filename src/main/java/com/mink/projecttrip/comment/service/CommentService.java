@@ -4,6 +4,8 @@ import com.mink.projecttrip.comment.domain.Comment;
 import com.mink.projecttrip.comment.dto.CommentDetail;
 import com.mink.projecttrip.comment.repository.CommentRepository;
 import com.mink.projecttrip.user.domain.User;
+import com.mink.projecttrip.user.domain.UserProfile;
+import com.mink.projecttrip.user.repository.UserProfileRepository;
 import com.mink.projecttrip.user.service.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -16,20 +18,26 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class CommentService {
-    final CommentRepository commentRepository;
-    final UserService userService;
-
+    private final CommentRepository commentRepository;
+    private final UserService userService;
+    private final UserProfileRepository userProfileRepository;
 
     public List<CommentDetail> getCommentList(long postId ,long userId) {
         List<Comment> commentList = commentRepository.findByPostId(postId);
+
         List<CommentDetail> commentDetailList = new ArrayList<>();
         for (Comment comment : commentList) {
             User user = userService.getUserById(comment.getUserId());
+            UserProfile userProfile = userProfileRepository.findByUserId(comment.getUserId());
+
+            String profileImg = userProfile != null ? userProfile.getProfileImg() : "/img/profile.png";
+
             CommentDetail commentDetail = CommentDetail.builder()
                     .id(comment.getId())
                     .userId(comment.getUserId())
                     .nickName(user.getNickName())
                     .comment(comment.getComment())
+                    .profileImg(profileImg)
                     .build();
             commentDetailList.add(commentDetail);
         }

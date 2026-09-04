@@ -12,6 +12,7 @@ public class CommentDetail {
     private long userId;
     private String nickName;
     private String comment;
+    private String profileImg;
 
 
 }

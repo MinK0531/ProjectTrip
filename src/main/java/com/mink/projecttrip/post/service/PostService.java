@@ -15,6 +15,8 @@ import com.mink.projecttrip.post.dto.PostMapPoint;
 import com.mink.projecttrip.post.repository.PostImageRepository;
 import com.mink.projecttrip.post.repository.PostRepository;
 import com.mink.projecttrip.user.domain.User;
+import com.mink.projecttrip.user.domain.UserProfile;
+import com.mink.projecttrip.user.repository.UserProfileRepository;
 import com.mink.projecttrip.user.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataAccessException;
@@ -38,6 +40,8 @@ public class PostService {
     private final CountryRepository countryRepository;
     private final LikeService likeService;
     private final CommentService commentService;
+    private final UserProfileRepository userProfileRepository;
+
     @Transactional
     public boolean createPost(long userId,
                               long countryId,
@@ -85,6 +89,7 @@ public class PostService {
 
                 savedImagePaths.add(imagePath);
 
+
                 PostImage postImage = PostImage.builder()
                         .postId(post.getId())
                         .imagePath(imagePath)
@@ -107,7 +112,6 @@ public class PostService {
         for (Post post : postList) {
 
             User user = userService.getUserById(post.getUserId());
-
             int likeCount = likeService.countByPostId(post.getId());
             boolean isLike = likeService.isLikeByPostIdAndUserId(post.getId(), userId);
             List<CommentDetail> commentList = commentService.getCommentList(post.getId(),userId);
@@ -128,6 +132,9 @@ public class PostService {
             String countryName = countryRepository.findById(post.getCountryId())
                     .map(Country::getCountryNameKo)
                     .orElse("알 수 없는 나라");
+            UserProfile userProfile = userProfileRepository.findByUserId(post.getUserId());
+
+            String profileImg = userProfile != null ? userProfile.getProfileImg() : "/img/profile.png";
 
             PostDetail postDetail = PostDetail.builder()
                     .id(post.getId())
@@ -145,6 +152,7 @@ public class PostService {
                     .createdAt(post.getCreatedAt())
                     .imageList(imageList)
                     .commentCount(commentList.size())
+                    .profileImg(profileImg)
                     .likeCount(likeCount)
                     .isLike(isLike)
                     .build();
@@ -182,6 +190,9 @@ public class PostService {
         String countryName = countryRepository.findById(post.getCountryId())
                         .map(Country::getCountryNameKo)
                         .orElse("알 수 없는 나라");
+        UserProfile userProfile = userProfileRepository.findByUserId(post.getUserId());
+
+        String profileImg = userProfile != null ? userProfile.getProfileImg() : "/img/profile.png";
 
         return PostDetail.builder()
                 .id(post.getId())
@@ -199,6 +210,7 @@ public class PostService {
                 .createdAt(post.getCreatedAt())
                 .imageList(imageList)
                 .commentList(commentList)
+                .profileImg(profileImg)
                 .likeCount(likeCount)
                 .isLike(isLike)
                 .build();

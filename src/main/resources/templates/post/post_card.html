@@ -74,13 +74,13 @@
                     <div class="modal-detail-header">
                         <div class="d-flex align-items-center">
                             <div class="modal-writer-profile-wrap">
-                                <img src="/img/profile.png"
+                                <img th:src="${post.profileImg}"
                                      alt="Profile"
                                      class="profile-pic profile-sty">
                             </div>
                             <div>
                                 <h6 class="mb-0 font-weight-bold text-dark small"
-                                    th:text="${post.nickName}">
+                                    th:text="${post.nickName != null ? post.nickName : 'User'}">>
                                 </h6>
 
                                 <small class="text-muted d-flex align-items-center modal-music-info">
@@ -142,8 +142,10 @@
                         </div>
 
                         <div th:each="comment : ${post.commentList}" class="comment-row d-flex align-items-start mb-2 ml-3">
-                            <div class=" col-9">
-                                <span th:text="${comment.nickName}" class="comment-text font-weight-bold mr-2 text-dark"></span>
+                            <div class=" col-9  d-flex align-items-center">
+                                <img th:src="${comment.profileImg != null ? comment.profileImg : '/img/profile.png'}"
+                                     alt="Profile" class="comment-profile-img mr-3">
+                                <span th:text="${comment.nickName}" class="comment-text font-weight-bold mr-3 text-dark"></span>
                                 <span th:text="${comment.comment}" class="comment-text text-secondary"></span>
                             </div>
                             <button th:if="${comment.userId == session.userId}"
@@ -183,7 +185,7 @@
                             <input type="hidden" id="modalPostId" th:value="${post.id}">
 
                             <div class="modal-input-profile-wrap">
-                                <img th:src="${session.userProfileImg != null ? session.userProfileImg : '/img/profile.png'}"
+                                <img th:src="${session.userProfileImg}"
                                      alt="Profile" class="profile-pic profile-sty">
                             </div>
 

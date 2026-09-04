@@ -1,34 +1,32 @@
 package com.mink.projecttrip.user.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
+@Setter
 @Builder
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "`user`")
+@Table(name = "`user_profile`")
 @Entity
-public class User {
+public class UserProfile {
+
     @Id
-    @GeneratedValue(strategy =GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    private String nickName;
-    private String password;
-    private String name;
-    private String email;
-    private String countryCode;
+    private long userId;
+    private String profileWord;
+    private  String profileImg;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 }

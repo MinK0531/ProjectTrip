@@ -187,9 +187,11 @@ main {
 .airport-code {
     background: var(--blue-deep);
     color: #fff;
+    margin-left: 25px;
+    margin-top: 10px;
     padding: 2px 9px;
     font-weight: 700;
-    font-size: 24px;
+    font-size: 32px;
     border-radius: 3px;
 }
 
@@ -1615,4 +1617,12 @@ main {
     border-radius: 10px;
     padding: 12px 15px;
     margin-bottom: 15px;
+}
+.comment-profile-img {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
 }

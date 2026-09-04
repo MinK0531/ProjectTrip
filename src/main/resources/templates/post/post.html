@@ -6,7 +6,8 @@
     <div class="border-t border-gray-300 border-b relative h-20 flex items-center px-4 overflow-hidden">
         <div class="flex items-center gap-3 z-10">
             <div class="w-12 h-12 rounded-full border-2 border-gray-100 overflow-hidden bg-orange-100">
-                <img src="/img/profile.png" alt="Profile" class="w-full h-full object-cover postcard-profile-img">
+                <img th:src="${post.profileImg != null and post.profileImg != ''? post.profileImg : '/img/profile.png'}"
+                     alt="Profile" class="w-full h-full object-cover postcard-profile-img">
             </div>
 
             <div>
