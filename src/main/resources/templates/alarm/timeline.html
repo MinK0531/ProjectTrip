@@ -4,15 +4,362 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{components/default_head}">
 
+<head>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+
+</head>
 <body>
 <div layout:fragment="content">
-    <main class="max-w-2xl mx-auto px-4 py-20">
-        <div class="space-y-6">
-            <div>
-                mmmmmmmmmmm
-            </div>
+
+    <div class=" notification-page max-w-2xl mx-auto px-4 py-20">
+        <h2 class="text-2xl font-bold mb-6">
+            알림
+        </h2>
+
+        <div id="notificationList" class="space-y-3">
         </div>
-    </main>
+
+        <div id="emptyNotification"
+             class="text-center py-20 text-gray-400 hidden">
+            새로운 알림이 없습니다.
+        </div>
+
+        <template id="alarmTemplate">
+            <div class="alarm-item">
+                <div class="flex-shrink-0">
+                    <img src="/img/profile.png"
+                         alt="Profile"
+                         class="user-profile-img w-12 h-12 rounded-full object-cover border border-gray-100">
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="font-bold text-gray-800 alarm-message truncate">
+                    </div>
+                    <div class="text-sm text-gray-400 mt-1 alarm-time">
+                    </div>
+                </div>
+                <div class="friend-buttons mt-2 hidden">
+                    <button type="button" class="friend-accept-btn px-3 py-1.5 text-sm bg-black text-white rounded-md"> 수락 </button>
+                    <button type="button" class="friend-reject-btn px-3 py-1.5 text-sm bg-gray-200 text-gray-700 rounded-md ml-1"> 거절 </button>
+                </div>
+                <div class="unread-dot w-2.5 h-2.5 rounded-full bg-blue-500 flex-shrink-0 hidden"></div>
+            </div>
+        </template>
+
+    </div>
+
+    <script>
+        $(function(){
+
+            function timeAgo(dateString) {
+                const created = new Date(dateString);
+                const now = new Date();
+                const diffSec = Math.floor((now - created) / 1000);
+
+                if (diffSec < 60) return '방금 전';
+                const diffMin = Math.floor(diffSec / 60);
+                if (diffMin < 60) return diffMin + '분 전';
+                const diffHour = Math.floor(diffMin / 60);
+                if (diffHour < 24) return diffHour + '시간 전';
+                const diffDay = Math.floor(diffHour / 24);
+                if (diffDay < 7) return diffDay + '일 전';
+                return created.toLocaleDateString('ko-KR');
+            }
+
+            function alarmMessage(type, nickName, action) {
+                if (type === 'LIKE') {
+                    return nickName + '님이 회원님의 게시물을 좋아합니다.';
+                }
+
+                if (type === 'COMMENT') {
+                    return nickName + '님이 댓글을 남겼습니다.';
+                }
+
+                if (type === 'FRIEND') {
+                    if (action === 'REQUEST') {
+                        return nickName + '님이 친구 요청을 보냈습니다.';
+                    }
+                    if (action === 'REQUEST_SENT') {
+                        return nickName + '님에게 친구 요청을 했습니다.';
+                    }
+                    if (action === 'ACCEPT') {
+                        return nickName + '님과 친구가 되었습니다.';
+                    }
+                    if (action === 'REJECT') {
+                        return nickName + '님의 친구 요청을 거절했습니다.';
+                    }
+                }
+                return nickName + '님에게서 새 알림이 도착했습니다.';
+            }
+
+            function renderAlarm(alarm) {
+                const $node = $($('#alarmTemplate').prop('content')).clone();
+
+                $node.find('.user-profile-img').attr('src', alarm.fromUserProfileImg);
+                $node.find('.alarm-message').text(alarmMessage(alarm.type, alarm.fromUserNickName,alarm.action));
+                $node.find('.alarm-time').text(timeAgo(alarm.createdAt));
+
+                if (!alarm.isRead) {
+                    $node.find('.unread-dot').removeClass('hidden');
+                }
+                if (alarm.type == 'FRIEND' && alarm.action === 'REQUEST') {
+                    $node.find('.friend-buttons').removeClass('hidden');
+                    $node.find('.alarm-item').attr('data-from-user-id', alarm.fromUserId);
+
+                    $node.find('.friend-accept-btn').on('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        const fromUserId = alarm.fromUserId;
+
+                        $.ajax({
+                            url: '/friend/accept',
+                            type: 'POST',
+                            data: {fromUserId: fromUserId},
+                            success: function (response) {
+                                if (response.result == 'success') {
+                                    $node.find('.alarm-message').text(alarm.fromUserNickName + '님과 친구가 되었습니다.');
+                                    $node.find('.friend-buttons').remove();
+                                    $node.find('.unread-dot').addClass('hidden');
+                                    alarm.action = 'ACCEPT';
+                                    alarm.isRead = true;
+                                    location.reload();
+                                } else {
+                                    alert("친구 수락 실패"  + response.message);
+                                }
+                            }, error: function () {
+                                alert("친구 수락 에러");
+                            }
+                        });
+                    });
+
+                    $node.find('.friend-reject-btn').on('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const fromUserId = alarm.fromUserId;
+                        $.ajax({
+                            url: '/friend/reject',
+                            type: 'POST',
+                            data: {fromUserId: fromUserId},
+                            success: function (response) {
+                                if (response.result == 'success') {
+                                    $node.find('.alarm-message').text(alarm.fromUserNickName + '님의 친구 요청을 거절했습니다.');
+                                    $node.find('.friend-buttons').remove();
+                                    $node.find('.unread-dot').addClass('hidden');
+                                    alarm.action = 'REJECT';
+                                    alarm.isRead = true;
+
+                                    location.reload();
+                                } else {
+                                    alert("친구 거절 실패");
+                                }
+                            }, error: function () {
+                                alert("친구 거절 에러");
+                            }
+                        });
+                    });
+                } else if( alarm.type == 'FRIEND' && alarm.action === 'ACCEPT') {
+                    $node.find('.friend-buttons').remove();
+                } else if (alarm.type == 'FRIEND' && alarm.action === 'REJECT') {
+                    $node.find('.friend-buttons').remove();
+                }else {
+                    $node.find('.alarm-item').attr('data-post-id', alarm.postId);
+
+                    $node.find('.alarm-item').on('click', function () {
+
+                        if (alarm.type !== 'LIKE' && alarm.type !== 'COMMENT') {
+                            return;
+                        }
+
+                        const $dot = $(this).find('.unread-dot');
+
+                        if (!alarm.isRead) {
+
+                            $.ajax({
+                                url: '/alarm/read/' + alarm.id,
+                                type: 'POST',
+                                success: function (response) {
+
+                                    if (response.result === 'success') {
+                                        alarm.isRead = true;
+                                        $dot.addClass('hidden');
+                                    }
+                                },
+                                error: function () {
+                                    console.log('알림 읽음 처리 실패');
+                                }
+                            });
+                        }
+
+                        openPostDetailModal(alarm.postId);
+                    });
+                }
+                return $node;
+            }
+
+            $.ajax({
+                url:'/alarm/list'
+                ,type:"GET"
+                ,dataType:"json",
+                success:function(response){
+                    if(response.result == "success"){
+                        const alarms = response.data;
+                        $("#notificationList").empty();
+                        if(alarms.length == 0){
+                            $("#emptyNotification").removeClass("hidden");
+                            return;
+                        }
+
+                        $("#emptyNotification").addClass("hidden");
+                        alarms.forEach(function (alarm){
+                           $("#notificationList").append(renderAlarm(alarm));
+                        });
+                    }else{
+                        alert("알림 실패");
+                    }
+                },error:function(){
+                    alert("알람 에러");
+                }
+            });
+            function openPostDetailModal(postId) {
+                sessionStorage.setItem("openPostId", postId);
+
+                $.ajax({
+                    url: '/post/detail',
+                    type: 'GET',
+                    data: { postId: postId },
+                    dataType: 'html',
+
+                    success: function (html) {
+
+                        $('#postDetailModal').remove();
+
+                        $('body').append(html);
+
+                        const $modal = $('#postDetailModal');
+
+                        if (window.lucide) {
+                            lucide.createIcons();
+                        }
+
+                        if (window.Swiper) {
+                            new Swiper($modal.find('.modal-swiper')[0], {
+                                pagination: {
+                                    el: $modal.find('.swiper-pagination')[0],
+                                    clickable: true
+                                }
+                            });
+                        }
+
+                        $modal.modal('show');
+                        $modal.on('hidden.bs.modal', function () {
+                            $modal.remove();
+                        });
+
+                    },
+                    error: function () {
+                        alert('게시물을 불러오지 못했습니다.');
+                    }
+                });
+                $(document).on("hidden.bs.modal", "#postDetailModal", function () {
+                    sessionStorage.removeItem("openPostId");
+                });
+
+            }
+            $(document).on("click", ".like-btn", function(){
+
+                let $icon = $(this);
+                let postId = $icon.data("post-id");
+
+                $.ajax({
+                    type:"post"
+                    , url:"/post/like"
+                    , data:{"postId":postId}
+                    , success:function (response){
+                        if(response.result == "success"){
+                            location.reload();
+                        }else{
+                            alert("좋아요 실패");
+                        }
+                    },error: function (){
+                        alert("좋아요 에러");
+                    }
+                });
+
+            });
+            $(document).on("click", ".unlike-btn", function(){
+                let postId = $(this).data("post-id");
+
+                $.ajax({
+                    type:"DELETE"
+                    , url:"/post/unlike"
+                    , data:{"postId":postId}
+                    , success:function (response){
+                        if(response.result == "success"){
+                            location.reload();
+                        }else{
+                            alert("좋아요 취소 실패");
+                        }
+                    },error: function (){
+                        alert("좋아요 취소 에러");
+                    }
+                });
+            });
+            $(document).on("click", "#btnCommentSubmit", function () {
+                let postId = $("#modalPostId").val();
+                let comment = $("#commentInput").val();
+
+                if (!comment || comment.trim() === "") {
+                    alert("댓글을 입력하세요.");
+                    return;
+                }
+
+                $.ajax({
+                    type: "post",
+                    url: "/comment/write",
+                    data: { postId: postId, comments: comment },
+                    success: function (response) {
+                        if (response.result === "success") {
+                            location.reload();
+                        } else {
+                            alert("댓글 작성 실패!");
+                        }
+                    },
+                    error: function () {
+                        alert("댓글 에러!");
+                    }
+                });
+            });
+            $(document).on("click", ".comment-delete-btn", function () {
+
+                const commentId = $(this).data("comment-id");
+
+                $.ajax({
+                    url: "/comment/remove",
+                    type: "DELETE",
+                    data: {commentId: commentId},
+                    success: function (response) {
+                        if (response.result === "success") {
+                            location.reload();
+                        } else {
+                            alert("댓글 삭제 실패");
+                        }
+                    }, error: function () {
+                        alert("댓글 삭제 에러");
+                    }
+                });
+            });
+
+            $(document).ready(function () {
+                let savedPostId = sessionStorage.getItem("openPostId");
+                if (savedPostId) {openPostDetailModal(savedPostId);}
+
+            });
+        });
+
+    </script>
 </div>
+
 </body>
 </html>

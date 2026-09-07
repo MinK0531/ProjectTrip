@@ -24,7 +24,7 @@ public class MypageController {
     {
         Long userId = (Long)session.getAttribute("userId");
         if(userId == null){
-            return "redirect:/login";
+            return "redirect:/user/signin";
         }
         int postCount = postRepository.countByUserId(userId);
         int wishlistCount = wishlistRepository.countByUserId(userId);

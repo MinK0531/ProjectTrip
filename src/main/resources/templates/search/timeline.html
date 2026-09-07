@@ -3,7 +3,11 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{components/default_head}">
+<head>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+</head>
 <body>
 <div layout:fragment="content">
     <main class="bg-gray-50 pt-16">
@@ -23,10 +27,10 @@
                     <button data-tab="all" class="tab-btn flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold rounded-xl transition-all bg-white shadow-md text-blue-600">
                         <i data-lucide="search" class="w-4 h-4 fill-blue-600/10"></i> 전체
                     </button>
-                    <button data-tab="users" class="tab-btn flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold rounded-xl transition-all text-gray-500 hover:text-gray-700">
+                    <button data-tab="users" class="tab-btn flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold rounded-xl transition-all text-gray-500 hover:text-gray-700 ">
                         <i data-lucide="user" class="w-4 h-4"></i> 사용자
                     </button>
-                    <button data-tab="countries" class="tab-btn flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold rounded-xl transition-all text-gray-500 hover:text-gray-700">
+                    <button data-tab="countries" class="tab-btn flex-1 flex items-center justify-center gap-2 py-3 text-sm font-bold rounded-xl transition-all text-gray-500 hover:text-gray-700 ">
                         <i data-lucide="globe" class="w-4 h-4"></i> 나라
                     </button>
                 </div>
@@ -39,13 +43,49 @@
 
                 <div id="searchResults" class="hidden">
                     <div id="userSection" class="mb-10 hidden">
-                        <h3 class="text-sm font-bold text-gray-400 mb-4 px-2 uppercase tracking-wider">Users</h3>
+
+                        <h3 class="text-sm font-bold text-gray-400 mb-4 px-2 uppercase tracking-wider">
+                            Users
+                        </h3>
+
                         <div id="userList" class="grid gap-3"></div>
+
                     </div>
 
+                    <template id="userItemTemplate">
+                        <div class="user-search-item bg-white rounded-2xl border border-gray-100 p-4 flex items-center justify-between transition-all hover:shadow-md">
+
+                            <div class="d-flex align-items-center min-w-0">
+                                <div class="flex-shrink-0">
+                                    <img src="/img/profile.png"
+                                         alt="Profile"
+                                         class="user-profile-img w-12 h-12 rounded-full object-cover border border-gray-100">
+                                </div>
+                                <div class="ml-3 min-w-0">
+                                    <div class="user-nickname font-weight-bold text-dark text-truncate"></div>
+                                </div>
+                            </div>
+                            <button type="button"
+                                    class="friend-request-btn btn btn-primary btn-sm rounded-pill px-3">
+                                <i data-lucide="user-plus" class="w-4 h-4 mr-1"></i>
+                                친구 추가
+                            </button>
+
+                        </div>
+                    </template>
+
                     <div id="postSection" class="hidden">
-                        <h3 class="text-sm font-bold text-gray-400 mb-4 px-2 uppercase tracking-wider">Posts & Countries</h3>
+                        <h3 class="text-sm font-bold text-gray-400 mb-4 px-2 uppercase tracking-wider">
+                            Posts
+                        </h3>
                         <div id="postList" class="grid gap-6"></div>
+                    </div>
+
+                    <div id="countryPostSection" class="hidden">
+                        <h3 class="text-sm font-bold text-gray-400 mb-4 px-2 uppercase tracking-wider">
+                            Countries
+                        </h3>
+                        <div id="countryPostList" class="grid gap-6"></div>
                     </div>
 
                     <div id="noResults" class="hidden text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
@@ -56,6 +96,161 @@
             </div>
         </div>
     </main>
+
+    <script>
+        $(function (){
+
+            const $searchInput = $("#searchInput");
+            const $tabButtons = $("#tabContainer .tab-btn");
+            const $userSection = $('#userSection');
+            const $userList = $('#userList');
+            const $userItemTemplate = $('#userItemTemplate');
+
+            const $postSection = $('#postSection');
+            const $countryPostSection = $('#countryPostSection');
+
+            let currentTab = "all";
+            let debounceTimer = null;
+            let lastKeyword = "";
+
+            $tabButtons.on("click", function () {
+                currentTab = $(this).data("tab");
+                $tabButtons.removeClass('bg-white shadow-md text-blue-600').addClass('text-gray-500');
+                $(this).addClass('bg-white shadow-md text-blue-600').removeClass('text-gray-500');
+
+                if (currentTab == "all") {
+                    $userSection.toggleClass("hidden", $userList.children().length == 0);
+                    $postSection.addClass("hidden");
+                    $countryPostSection.addClass("hidden");
+                } else if (currentTab == "users") {
+                    $userSection.toggleClass("hidden", $userList.children().length == 0);
+                    $postSection.addClass("hidden");
+                    $countryPostSection.addClass("hidden");
+                } else if (currentTab == "countries") {
+                    $userSection.addClass('hidden');
+                    $postSection.addClass('hidden');
+                    $countryPostSection.addClass('hidden');
+                }
+            });
+
+            $searchInput.on("input", function () {
+                const keyword = $(this).val().trim();
+                clearTimeout(debounceTimer);
+
+                if (keyword === '') {
+                    $userList.empty();
+                    $userSection.addClass("hidden");
+                    $('#searchResults').addClass('hidden');
+                    $('#emptyState').removeClass('hidden');
+                    return;
+                }
+
+                debounceTimer = setTimeout(() => {
+                    lastKeyword = keyword;
+
+                    $.ajax({
+                        url: '/search/search',
+                        method: 'GET',
+                        dataType: 'json',
+                        data: { keyword: keyword },
+                        success: function (response) {
+                            if (response.result == "success") {
+                                const data = response.data || {};
+                                const users = data.users || [];
+
+                                $('#emptyState').addClass('hidden');
+                                $('#searchResults').removeClass('hidden');
+
+                                renderUsers(users);
+                            } else {
+                                alert("검색 실패");
+                            }
+                        },
+                        error: function () {
+                            alert("검색 에러");
+                        }
+                    });
+
+                }, 300);
+            });
+
+            function renderUsers(users) {
+                $userList.empty();
+
+                if (!users || users.length === 0) {
+                    $userSection.addClass('hidden');
+                    $('#noResults').removeClass('hidden');
+                    return;
+                }
+
+                $('#noResults').addClass('hidden');
+
+                users.forEach((user) => {
+
+                    const $node = $($userItemTemplate.prop('content')).clone();
+
+                    $node.find('.user-profile-img').attr('src', user.profileImg);
+
+                    $node.find('.user-nickname').text(user.nickName);
+
+                    const $button = $node.find('.friend-request-btn');
+
+                    $button.attr('data-user-id', user.id);
+
+                    if (user.friend) {
+
+                        $button.remove();
+
+                    } else if (user.requestSent) {
+
+                        $button
+                            .text('요청 완료')
+                            .prop('disabled', true)
+                            .removeClass('btn-primary')
+                            .addClass('btn-secondary');
+                    }
+
+                    $userList.append($node);
+                });
+
+                $userSection.removeClass('hidden');
+
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            }
+            $userList.on('click', '.friend-request-btn', function () {
+
+                let toUserId = $(this).data('user-id');
+                let $button = $(this);
+
+                $.ajax({
+                    url: '/friend/request',
+                    type: 'POST',
+                    data: {
+                        toUserId: toUserId
+                    },
+                    success: function (response) {
+                        if (response.result === 'success') {
+                            $button
+                                .text('요청 완료')
+                                .prop('disabled', true)
+                                .removeClass('btn-primary')
+                                .addClass('btn-secondary');
+
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function () {
+                        alert('친구 요청에 실패했습니다.');
+                    }
+                });
+            });
+        });
+
+    </script>
 </div>
+
 </body>
 </html>

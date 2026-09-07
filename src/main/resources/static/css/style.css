@@ -1626,3 +1626,53 @@ main {
     border-radius: 50%;
     display: block;
 }
+.notification-page {
+    font-family: 'Noto Sans KR', sans-serif;
+    display: block;
+    min-height: auto;
+    margin-top: 0;
+}
+
+.notification-page #notificationList {
+    width: 100%;
+}
+
+.notification-page .alarm-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 16px;
+    background: #fff;
+    border-radius: 12px;
+    box-sizing: border-box;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.notification-page .alarm-item:hover {
+    background-color: #f8f9fa;
+}
+
+.notification-page .user-profile-img {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.notification-page .alarm-message {
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.notification-page .alarm-time {
+    font-size: 13px;
+}
+
+.notification-page .unread-dot {
+    width: 10px;
+    height: 10px;
+    flex-shrink: 0;
+}

@@ -91,6 +91,8 @@
     <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
     <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
     <script>
+
+
         let countryNameMap = {};
 
 
@@ -252,6 +254,7 @@
                       }
                   }
                 );
+
                 const wishPointSeries = chart.series.push(
                   am5map.MapPointSeries.new(root,{
                       latitudeField: "latitude",

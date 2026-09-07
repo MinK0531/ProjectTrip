@@ -1,8 +1,10 @@
 package com.mink.projecttrip.comment.service;
 
+import com.mink.projecttrip.alarm.service.AlarmService;
 import com.mink.projecttrip.comment.domain.Comment;
 import com.mink.projecttrip.comment.dto.CommentDetail;
 import com.mink.projecttrip.comment.repository.CommentRepository;
+import com.mink.projecttrip.post.repository.PostRepository;
 import com.mink.projecttrip.user.domain.User;
 import com.mink.projecttrip.user.domain.UserProfile;
 import com.mink.projecttrip.user.repository.UserProfileRepository;
@@ -21,7 +23,8 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserService userService;
     private final UserProfileRepository userProfileRepository;
-
+    private final PostRepository postRepository;
+    private final AlarmService alarmService;
     public List<CommentDetail> getCommentList(long postId ,long userId) {
         List<Comment> commentList = commentRepository.findByPostId(postId);
 
@@ -58,6 +61,9 @@ public class CommentService {
         }catch (DataAccessException e){
             return false;
         }
+        postRepository.findById(postId).ifPresent(post ->
+                alarmService.createCommentAlarm(post.getUserId(), userId, postId)
+        );
         return true;
     }
     @Transactional

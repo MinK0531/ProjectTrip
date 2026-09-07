@@ -11,4 +11,7 @@ import java.util.List;
 public interface PostRepository extends JpaRepository<Post, Long> {
     List<Post> findByUserIdOrderByIdDesc(long userId);
     public int countByUserId(long userId);
+    List<Post> findByContentsContainingIgnoreCaseOrderByIdDesc(String contents);
+    List<Post> findByCountryIdInOrderByIdDesc(List<Long> countryIds);
+
 }

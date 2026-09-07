@@ -1,14 +1,18 @@
 package com.mink.projecttrip.mypage;
 
 import com.mink.projecttrip.common.dto.ApiResponse;
+import com.mink.projecttrip.country.service.CountryService;
+import com.mink.projecttrip.post.dto.PostDetail;
 import com.mink.projecttrip.post.dto.PostMapPoint;
 import com.mink.projecttrip.post.service.PostService;
 import com.mink.projecttrip.wishlist.dto.WishlistMapPoint;
 import com.mink.projecttrip.wishlist.service.WishlistService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -20,6 +24,8 @@ public class MypageRestController {
 
     private final PostService postService;
     private final WishlistService wishlistService;
+    private final CountryService countryService;
+
     @GetMapping("/post/point")
     public ApiResponse<List<PostMapPoint>> getMapPostPoint(
             HttpSession session
@@ -48,4 +54,5 @@ public class MypageRestController {
                 wishlistService.getMyWishlistPoint(userId)
         );
     }
+
 }
