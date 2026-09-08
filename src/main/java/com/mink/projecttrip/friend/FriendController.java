@@ -1,5 +1,6 @@
 package com.mink.projecttrip.friend;
 
+import com.mink.projecttrip.friend.repository.FriendRepository;
 import com.mink.projecttrip.post.repository.PostRepository;
 import com.mink.projecttrip.user.domain.User;
 import com.mink.projecttrip.user.domain.UserProfile;
@@ -22,6 +23,8 @@ public class FriendController {
     private final WishlistRepository wishlistRepository;
     private final UserRepository userRepository;
     private final UserProfileRepository userProfileRepository;
+    private final FriendRepository friendRepository;
+
     @GetMapping("/{userId}")
     public String friendMypage(
             @PathVariable Long userId,
@@ -34,12 +37,13 @@ public class FriendController {
         int postCount = postRepository.countByUserId(userId);
 
         int wishlistCount = wishlistRepository.countByUserId(userId);
-
+        int friendCount = friendRepository.countByUserId(userId);
         model.addAttribute("friend", user);
         model.addAttribute("friendProfile", userProfile);
 
         model.addAttribute("postCount", postCount);
         model.addAttribute("wishlistCount", wishlistCount);
+        model.addAttribute("friendCount", friendCount);
 
         return "friend/friendpage";
     }

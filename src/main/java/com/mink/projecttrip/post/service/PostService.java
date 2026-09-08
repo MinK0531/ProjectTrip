@@ -12,6 +12,7 @@ import com.mink.projecttrip.post.domain.PostImage;
 import com.mink.projecttrip.post.dto.PostDetail;
 import com.mink.projecttrip.post.dto.PostImageDetail;
 import com.mink.projecttrip.post.dto.PostMapPoint;
+import com.mink.projecttrip.post.dto.PostTicketDetail;
 import com.mink.projecttrip.post.repository.PostImageRepository;
 import com.mink.projecttrip.post.repository.PostRepository;
 import com.mink.projecttrip.user.domain.User;
@@ -299,10 +300,14 @@ public class PostService {
         List<PostMapPoint> pointList = new ArrayList<>();
 
         for(Post post : postList){
-
+            Optional<Country> optionalCountry = countryRepository.findById(post.getCountryId());
+            if (optionalCountry.isEmpty()) {
+                continue;
+            }
             if(post.getLatitude() == 0 && post.getLongitude() == 0){
                 continue;
             }
+            Country country = optionalCountry.get();
             String countryName = countryRepository.findById(post.getCountryId())
                     .map(Country::getCountryNameKo)
                     .orElse("알 수 없는 나라");
@@ -314,10 +319,68 @@ public class PostService {
                             .longitude(post.getLongitude())
                             .cityName(post.getCityName())
                             .countryName(countryName)
+                            .countryCode(country.getCountryCode())
                             .build()
             );
         }
         return pointList;
     }
 
+    @Transactional
+    public List<PostTicketDetail> getCountryPostList(
+            long userId,
+            String countryCode) {
+
+        User user = userService.getUserById(userId);
+
+        if (user == null) {
+            return new ArrayList<>();
+        }
+
+        Optional<Country> optionalCountry =
+                countryRepository.findByCountryCode(countryCode);
+
+        if (optionalCountry.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        Country country = optionalCountry.get();
+
+        List<Post> postList = postRepository.findByUserIdAndCountryIdOrderByIdDesc(
+                        userId,
+                        country.getId()
+                );
+
+        List<PostTicketDetail> ticketList = new ArrayList<>();
+
+        for (Post post : postList) {
+
+            if (post.getLatitude() == 0 && post.getLongitude() == 0) {
+                continue;
+            }
+
+            Optional<PostImage> firstImage =
+                    postImageRepository.findFirstByPostIdOrderBySortOrderAsc(
+                            post.getId()
+                    );
+
+            String imageUrl = "/img/profile.png";
+
+            if (firstImage.isPresent()) {
+                imageUrl = firstImage.get().getImagePath();
+            }
+
+            ticketList.add(
+                    PostTicketDetail.builder()
+                            .postId(post.getId())
+                            .imageUrl(imageUrl)
+                            .createdAt(post.getCreatedAt())
+                            .fromCountryCode(user.getCountryCode())
+                            .toCountryCode(country.getCountryCode())
+                            .build()
+            );
+        }
+
+        return ticketList;
+    }
 }

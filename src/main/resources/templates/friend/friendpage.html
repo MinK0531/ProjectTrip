@@ -3,7 +3,12 @@
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
       layout:decorate="~{components/default_head}">
+<head>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="/css/style.css">
 
+</head>
 <body>
 
 <div layout:fragment="content">
@@ -20,7 +25,6 @@
 
                 <div class="pass-content">
 
-                    <!-- 프로필 -->
                     <div class="top-section">
 
                         <div class="profile-pic-wrapper">
@@ -54,20 +58,15 @@
 
 
                         <div class="flight-details">
-
                             <div class="detail-item">
-
                                 <div class="label">
                                     FLIGHT
                                 </div>
-
                                 <div class="value"
                                      th:text="${postCount}">
                                     0
                                 </div>
-
                             </div>
-
 
                             <div class="detail-item">
 
@@ -106,7 +105,6 @@
                     <div class="divider"></div>
 
 
-                    <!-- 프로필 하단 -->
                     <div class="bottom-section">
 
                         <div class="user-stats">
@@ -127,26 +125,13 @@
                                     Following
                                 </span>
 
-                                <span class="stat-count"
-                                      th:text="${followingCount}">
+                                <span class="stat-count mb-4"
+                                      th:text="${friendCount}">
                                     0
                                 </span>
 
                             </div>
 
-
-                            <div class="stat-row">
-
-                                <span class="stat-label">
-                                    Follower
-                                </span>
-
-                                <span class="stat-count"
-                                      th:text="${followerCount}">
-                                    0
-                                </span>
-
-                            </div>
 
                         </div>
 
@@ -175,17 +160,133 @@
             </div>
 
         </div>
+        <div id="countryListFriendPanel" class="country-list-panel hidden">
 
+            <div class="country-panel-header">
+                <div class="country-panel-title">
+                    <i class="bi bi-airplane-fill"></i>
+                    <span id="countryFriendPanelName"></span>
+                </div>
+
+                <button type="button"
+                        id="countryFriendPanelClose"
+                        class="country-panel-close">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div id="countryFriendTicketGrid" class="country-ticket-grid">
+
+                <div class="country-ticket d-none">
+
+                    <div class="ticket-img-wrap">
+                        <img class="country-ticket-img">
+                    </div>
+
+                    <div class="ticket-divider">
+                        <div class="right-hole"></div>
+                        <div class="ticket-hole top"></div>
+                        <div class="ticket-hole bottom"></div>
+                    </div>
+
+                    <div class="country-ticket-body">
+
+                        <div class="country-ticket-date"></div>
+
+                        <div class="country-ticket-route">
+                            <span class="from"></span>
+                            <span class="mid">━━✈━━</span>
+                            <span class="to"></span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
     </div>
-
 
     <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
     <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
     <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
     <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
-
+    <script src="https://unpkg.com/lucide@latest"></script>
 
     <script th:inline="javascript">
+
+        function openCountryPanel(countryCode) {
+
+            if (!countryCode) {
+                alert("국가 코드 확인");
+                return;
+            }
+            const countryName = countryNameMap[countryCode] || countryCode;
+            $("#countryFriendPanelName").text(countryName);
+
+            renderCountryTickets([]);
+
+            $("#countryListFriendPanel").removeClass("hidden");
+
+            setTimeout(function () {
+                $("#countryListFriendPanel").addClass("show");
+            }, 10);
+
+            $.ajax({
+                url:  "/mypage/" + friendId + "/post/tickets",
+                type: "GET",
+                data: {countryCode: countryCode},
+                dataType: "json",
+                success: function (response) {
+                    if (response.result == "success") {
+                        renderCountryTickets(response.data);
+                    }else{
+                        alert("티켓 조회 실패");
+                        renderCountryTickets([]);
+                    }
+                }, error: function () {
+                    alert(("티켓 조회 에러"));
+                    renderCountryTickets([]);
+                }
+
+            });
+
+        }
+
+        function renderCountryTickets(postList) {
+
+            const $grid = $("#countryFriendTicketGrid");
+            $grid.find(".country-ticket.generated").remove();
+            const $template = $grid.find(".country-ticket.d-none").first();
+            if ($template.length === 0) {
+                return;
+            }
+            $.each(postList, function(index, post) {
+
+                console.log("친구 티켓 생성:", post);
+
+                const $ticket = $template.clone();
+
+                $ticket.removeClass("d-none").addClass("generated");
+                $ticket.attr("data-post-id", post.postId);
+                $ticket.find(".country-ticket-img").attr("src", post.imageUrl);
+                $ticket.find(".country-ticket-date").text(formatDate(post.createdAt));
+                $ticket.find(".from").text(post.fromCountryCode);
+                $ticket.find(".to").text(post.toCountryCode);
+
+                $grid.append($ticket);
+            });
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.getFullYear()
+                + "."
+                + String(date.getMonth() + 1).padStart(2, "0")
+                + "."
+                + String(date.getDate()).padStart(2, "0");
+        }
+
         const friendId = /*[[${friend.id}]]*/ 0;
         let countryNameMap = {};
 
@@ -389,7 +490,23 @@
 
                     }
                 );
+                polygonSeries.mapPolygons.template.events.on(
+                    "click",
+                    function (event) {
 
+                        const dataItem = event.target.dataItem;
+
+                        if (!dataItem) {
+                            return;
+                        }
+
+                        const dataContext = dataItem.dataContext;
+
+                        const countryCode = dataContext.id;
+
+                        openCountryPanel(countryCode);
+                    }
+                );
 
                 const wishPointSeries = chart.series.push(
                     am5map.MapPointSeries.new(root, {
@@ -495,7 +612,6 @@
 
                 });
 
-
                 chart.animate({
                     key: "rotationX",
                     from: 0,
@@ -505,7 +621,178 @@
                 });
                 chart.appear(1000, 100);
             });
+
         }
+        $(document).on("click", ".country-ticket.generated", function () {
+
+            const postId = $(this).data("post-id");
+
+            console.log("티켓 클릭 postId:", postId);
+
+            if (!postId) {
+                alert("게시물 번호가 없습니다.");
+                return;
+            }
+
+            openPostDetailModal(postId);
+        });
+        function adjustVerticalLocationFontSize() {
+            const el = document.getElementById("verticalLocation");
+
+            if (el) {
+                const textLength = el.textContent.trim().length;
+
+                let fontSize = 1.1;
+
+                if (textLength > 15) fontSize = 1.0;
+                if (textLength > 18) fontSize = 0.9;
+                if (textLength > 20) fontSize = 0.8;
+                if (textLength > 25) fontSize = 0.75;
+                if (textLength > 30) fontSize = 0.70;
+                el.style.fontSize = fontSize + "rem";
+            }
+        }
+        function openPostDetailModal(postId) {
+            sessionStorage.setItem("openPostId", postId);
+
+            $.ajax({
+                url: '/post/detail',
+                type: 'GET',
+                data: { postId: postId },
+                dataType: 'html',
+
+                success: function (html) {
+
+                    $('#postDetailModal').remove();
+
+                    $('body').append(html);
+
+                    const $modal = $('#postDetailModal');
+
+                    if (window.lucide) {
+                        lucide.createIcons();
+                    }
+                    adjustVerticalLocationFontSize($modal);
+                    if (window.Swiper) {
+                        new Swiper($modal.find('.modal-swiper')[0], {
+                            pagination: {
+                                el: $modal.find('.swiper-pagination')[0],
+                                clickable: true
+                            }
+                        });
+                    }
+
+                    $modal.modal('show');
+                    $modal.on('hidden.bs.modal', function () {
+                        $modal.remove();
+                    });
+
+                },
+                error: function () {
+                    alert('게시물을 불러오지 못했습니다.');
+                }
+            });
+            $(document).on("hidden.bs.modal", "#postDetailModal", function () {
+                sessionStorage.removeItem("openPostId");
+            });
+
+        }
+        $(document).on("click", ".like-btn", function(){
+
+            let $icon = $(this);
+            let postId = $icon.data("post-id");
+
+            $.ajax({
+                type:"post"
+                , url:"/post/like"
+                , data:{"postId":postId}
+                , success:function (response){
+                    if(response.result == "success"){
+                        location.reload();
+                    }else{
+                        alert("좋아요 실패");
+                    }
+                },error: function (){
+                    alert("좋아요 에러");
+                }
+            });
+
+        });
+        $(document).on("click", ".unlike-btn", function(){
+            let postId = $(this).data("post-id");
+
+            $.ajax({
+                type:"DELETE"
+                , url:"/post/unlike"
+                , data:{"postId":postId}
+                , success:function (response){
+                    if(response.result == "success"){
+                        location.reload();
+                    }else{
+                        alert("좋아요 취소 실패");
+                    }
+                },error: function (){
+                    alert("좋아요 취소 에러");
+                }
+            });
+        });
+        $(document).on("click", "#btnCommentSubmit", function () {
+            let postId = $("#modalPostId").val();
+            let comment = $("#commentInput").val();
+
+            if (!comment || comment.trim() === "") {
+                alert("댓글을 입력하세요.");
+                return;
+            }
+
+            $.ajax({
+                type: "post",
+                url: "/comment/write",
+                data: { postId: postId, comments: comment },
+                success: function (response) {
+                    if (response.result === "success") {
+                        location.reload();
+                    } else {
+                        alert("댓글 작성 실패!");
+                    }
+                },
+                error: function () {
+                    alert("댓글 에러!");
+                }
+            });
+        });
+        $(document).on("click", ".comment-delete-btn", function () {
+
+            const commentId = $(this).data("comment-id");
+
+            $.ajax({
+                url: "/comment/remove",
+                type: "DELETE",
+                data: {commentId: commentId},
+                success: function (response) {
+                    if (response.result === "success") {
+                        location.reload();
+                    } else {
+                        alert("댓글 삭제 실패");
+                    }
+                }, error: function () {
+                    alert("댓글 삭제 에러");
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            let savedPostId = sessionStorage.getItem("openPostId");
+            if (savedPostId) {openPostDetailModal(savedPostId);}
+
+        });
+        $("#countryFriendPanelClose").on("click", function () {
+            $("#countryListFriendPanel").removeClass("show");
+            setTimeout(function () {
+                $("#countryListFriendPanel").addClass("hidden");
+            }, 220);
+        });
+
 
     </script>
 

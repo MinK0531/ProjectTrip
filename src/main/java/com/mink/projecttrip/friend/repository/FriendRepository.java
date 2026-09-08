@@ -10,5 +10,5 @@ import java.util.List;
 public interface FriendRepository extends JpaRepository<Friend,Long> {
 
     boolean existsByUserIdAndFriendUserId(long userId, long friendUserId);
-
+    int countByUserId(long userId);
     }

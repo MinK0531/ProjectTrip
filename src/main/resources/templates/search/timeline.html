@@ -162,6 +162,8 @@
                                 $('#searchResults').removeClass('hidden');
 
                                 renderUsers(users);
+
+
                             } else {
                                 alert("검색 실패");
                             }
@@ -173,7 +175,22 @@
 
                 }, 300);
             });
+            function adjustVerticalLocationFontSize() {
+                const el = document.getElementById("verticalLocation");
 
+                if (el) {
+                    const textLength = el.textContent.trim().length;
+
+                    let fontSize = 1.1;
+
+                    if (textLength > 15) fontSize = 1.0;
+                    if (textLength > 18) fontSize = 0.9;
+                    if (textLength > 20) fontSize = 0.8;
+                    if (textLength > 25) fontSize = 0.75;
+                    if (textLength > 30) fontSize = 0.70;
+                    el.style.fontSize = fontSize + "rem";
+                }
+            }
             function renderUsers(users) {
                 $userList.empty();
 
@@ -200,8 +217,13 @@
                     if (user.friend) {
 
                         $button.remove();
+                        $node.find('.user-search-item').addClass('cursor-pointer');
 
-                    } else if (user.requestSent) {
+                        $node.find('.user-search-item').on('click', function () {
+                            location.href = '/friend/' + user.id;
+                        });
+
+                    }  else if (user.requestSent) {
 
                         $button
                             .text('요청 완료')
@@ -247,6 +269,7 @@
                     }
                 });
             });
+
         });
 
     </script>

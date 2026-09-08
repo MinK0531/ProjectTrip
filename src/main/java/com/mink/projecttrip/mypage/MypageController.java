@@ -1,6 +1,7 @@
 package com.mink.projecttrip.mypage;
 
 
+import com.mink.projecttrip.friend.repository.FriendRepository;
 import com.mink.projecttrip.post.repository.PostRepository;
 import com.mink.projecttrip.wishlist.repository.WishlistRepository;
 import jakarta.servlet.http.HttpSession;
@@ -17,6 +18,7 @@ public class MypageController {
 
     private final PostRepository postRepository;
     private final WishlistRepository wishlistRepository;
+    private final FriendRepository friendRepository;
 
     @GetMapping("/map")
 
@@ -28,10 +30,10 @@ public class MypageController {
         }
         int postCount = postRepository.countByUserId(userId);
         int wishlistCount = wishlistRepository.countByUserId(userId);
-
+        int friendCount = friendRepository.countByUserId(userId);
         model.addAttribute("postCount", postCount);
         model.addAttribute("wishlistCount",wishlistCount);
-
+        model.addAttribute("friendCount", friendCount);
         return "/mypage/map";
     }
 }
