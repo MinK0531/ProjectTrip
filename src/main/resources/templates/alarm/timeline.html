@@ -100,7 +100,7 @@
                 $node.find('.alarm-message').text(alarmMessage(alarm.type, alarm.fromUserNickName,alarm.action));
                 $node.find('.alarm-time').text(timeAgo(alarm.createdAt));
 
-                if (!alarm.isRead) {
+                if (!alarm.read) {
                     $node.find('.unread-dot').removeClass('hidden');
                 }
                 if (alarm.type == 'FRIEND' && alarm.action === 'REQUEST') {
@@ -148,7 +148,7 @@
                                     $node.find('.friend-buttons').remove();
                                     $node.find('.unread-dot').addClass('hidden');
                                     alarm.action = 'REJECT';
-                                    alarm.isRead = true;
+                                    alarm.read = true;
 
                                     location.reload();
                                 } else {
@@ -159,8 +159,30 @@
                             }
                         });
                     });
-                } else if( alarm.type == 'FRIEND' && alarm.action === 'ACCEPT') {
+                } else if (alarm.type === 'FRIEND' && alarm.action === 'ACCEPT') {
+
                     $node.find('.friend-buttons').remove();
+                    $node.find('.alarm-item').css('cursor', 'pointer');
+                    $node.find('.alarm-item').on('click', function () {
+
+                        if (!alarm.read) {
+
+                            $.ajax({
+                                url: '/alarm/read/' + alarm.id,
+                                type: 'POST',
+                                success: function (response) {
+
+                                    if (response.result === 'success') {
+                                        alarm.read = true;
+                                        $node.find('.unread-dot').addClass('hidden');
+                                    }
+                                }
+                            });
+                        }
+
+                        location.href = '/friend/' + alarm.fromUserId;
+                    });
+
                 } else if (alarm.type == 'FRIEND' && alarm.action === 'REJECT') {
                     $node.find('.friend-buttons').remove();
                 }else {
@@ -174,7 +196,7 @@
 
                         const $dot = $(this).find('.unread-dot');
 
-                        if (!alarm.isRead) {
+                        if (!alarm.read) {
 
                             $.ajax({
                                 url: '/alarm/read/' + alarm.id,
@@ -182,7 +204,7 @@
                                 success: function (response) {
 
                                     if (response.result === 'success') {
-                                        alarm.isRead = true;
+                                        alarm.read = true;
                                         $dot.addClass('hidden');
                                     }
                                 },
