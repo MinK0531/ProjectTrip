@@ -19,6 +19,12 @@ public class FriendService {
     private final FriendRequestRepository friendRequestRepository;
     private final AlarmService alarmService;
 
+    public boolean isFriend(long userId, long friendUserId) {
+        return friendRepository.existsByUserIdAndFriendUserId(
+                userId,
+                friendUserId
+        );
+    }
     @Transactional
     public boolean request(long fromUserId, long toUserId) {
 
