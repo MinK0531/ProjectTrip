@@ -308,8 +308,7 @@
             }
             $(document).on("click", ".like-btn", function(){
 
-                let $icon = $(this);
-                let postId = $icon.data("post-id");
+                let postId =  $(this).data("post-id");
 
                 $.ajax({
                     type:"post"

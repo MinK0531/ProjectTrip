@@ -7,6 +7,7 @@ import com.mink.projecttrip.post.dto.PostDetail;
 import com.mink.projecttrip.post.dto.PostMapPoint;
 import com.mink.projecttrip.post.dto.PostTicketDetail;
 import com.mink.projecttrip.post.service.PostService;
+import com.mink.projecttrip.wishlist.dto.WishlistDetail;
 import com.mink.projecttrip.wishlist.dto.WishlistMapPoint;
 import com.mink.projecttrip.wishlist.service.WishlistService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -58,8 +59,7 @@ public class MypageRestController {
             @RequestParam String countryCode,
             HttpSession session
     ) {
-        if (session == null ||
-                session.getAttribute("userId") == null) {
+        if (session == null || session.getAttribute("userId") == null) {
 
             return ApiResponse.fail("로그인이 필요합니다.");
         }
@@ -69,6 +69,21 @@ public class MypageRestController {
 
         return ApiResponse.success("나라별 티켓 조회 성공", data);
     }
+    @GetMapping("/wishlist/tickets")
+    public ApiResponse<List<WishlistDetail>> getCountryWishlistTickets(
+            @RequestParam String countryCode,
+            HttpSession session
+    ) {
+        if (session == null || session.getAttribute("userId") == null) {
+
+            return ApiResponse.fail("로그인이 필요합니다.");
+        }
+        long userId = (Long) session.getAttribute("userId");
+
+        List<WishlistDetail> data = wishlistService.getCountryWishList(userId, countryCode);
+
+        return ApiResponse.success("나라별 위시리스트 조회 성공", data);
+    }
     @GetMapping("/{friendId}/post/tickets")
     public ApiResponse<List<PostTicketDetail>> getFriendCountryTickets(
             @PathVariable Long friendId,
@@ -76,11 +91,15 @@ public class MypageRestController {
     ) {
 
         List<PostTicketDetail> data = postService.getCountryPostList(friendId, countryCode);
-
-        return ApiResponse.success(
-                "친구 나라별 티켓 조회 성공",
-                data
-        );
+        return ApiResponse.success("친구 나라별 티켓 조회 성공", data);
+    }
+    @GetMapping("/{friendId}/wishlist/tickets")
+    public ApiResponse<List<WishlistDetail>> getFriendWishlistTickets(
+            @PathVariable Long friendId,
+            @RequestParam String countryCode
+    ) {
+        List<WishlistDetail> data = wishlistService.getCountryWishList(friendId, countryCode);
+        return ApiResponse.success("친구 나라별 위시리스트 조회 성공", data);
     }
 
 }

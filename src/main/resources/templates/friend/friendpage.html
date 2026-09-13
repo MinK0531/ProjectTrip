@@ -16,73 +16,42 @@
     <div id="chartdiv">
 
         <div class="profile-card-container">
-
             <div class="boarding-pass">
-
                 <div class="top-stripe">
                     <img src="/img/top-stripe.png" alt="프로필 머리">
                 </div>
-
                 <div class="pass-content">
-
                     <div class="top-section">
-
                         <div class="profile-pic-wrapper">
-
                             <img id="friendProfileImg"
                                  th:src="${friendProfile != null && friendProfile.profileImg != null? friendProfile.profileImg: '/img/profile.png'}"
                                  class="profile-pic profile-sty">
-
                         </div>
 
                         <div class="plane-icon">
-
                             <svg viewBox="0 0 24 24">
                                 <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
                             </svg>
-
                         </div>
-
                     </div>
 
-
                     <div class="flight-info-row">
-
                         <div class="airport-code">
-
-                            <span th:text="${friend.countryCode != null ? friend.countryCode : ''}"
-                                  class="font-weight-bold">
-                            </span>
-
+                            <span th:text="${friend.countryCode != null ? friend.countryCode : ''}" class="font-weight-bold"></span>
                         </div>
-
 
                         <div class="flight-details">
                             <div class="detail-item">
-                                <div class="label">
-                                    FLIGHT
-                                </div>
-                                <div class="value"
-                                     th:text="${postCount}">
-                                    0
-                                </div>
+                                <div class="label">FLIGHT</div>
+                                <div class="value" th:text="${postCount}">0</div>
                             </div>
 
                             <div class="detail-item">
-
-                                <div class="label">
-                                    GATE
+                                <div class="label">GATE</div>
+                                <div class="value" th:text="${wishlistCount}">0
                                 </div>
-
-                                <div class="value"
-                                     th:text="${wishlistCount}">
-                                    0
-                                </div>
-
                             </div>
-
                         </div>
-
                     </div>
 
 
@@ -90,27 +59,18 @@
                         WHERE TO NEXT?
                     </h1>
 
-
                     <p class="airline-name">
-
                         항공사 이름 :
-
                         <span th:text="${friend.nickName}"
                               class="font-weight-bold">
                         </span>
-
                     </p>
 
 
                     <div class="divider"></div>
-
-
                     <div class="bottom-section">
-
                         <div class="user-stats">
-
                             <div class="mb-2 flex">
-
                                 <h3 class="profileWordText profileMessege mb-2"
                                     th:text="${friendProfile != null && friendProfile.profileWord != null? '- ' + friendProfile.profileWord: '-'}">
                                     -
@@ -118,18 +78,10 @@
 
                             </div>
 
-
                             <div class="stat-row">
-
-                                <span class="stat-label">
-                                    Following
+                                <span class="stat-label">Following</span>
+                                <span class="stat-count mb-4" th:text="${friendCount}">0
                                 </span>
-
-                                <span class="stat-count mb-4"
-                                      th:text="${friendCount}">
-                                    0
-                                </span>
-
                             </div>
 
 
@@ -139,26 +91,13 @@
                         <div class="qr-code-wrapper">
 
                             <div class="qr-mock">
-
-                                <div class="qr-eyes">
-                                    👀
-                                </div>
-
-                                <div class="qr-num"
-                                     th:text="${friend.id}">
-                                    3
-                                </div>
-
+                                <div class="qr-eyes">👀</div>
+                                <div class="qr-num" th:text="${friend.id}">3</div>
                             </div>
-
                         </div>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
         <div id="countryListFriendPanel" class="country-list-panel hidden">
 
@@ -205,6 +144,54 @@
 
             </div>
         </div>
+        <div id="WishListFriendPanel" class="country-list-panel hidden">
+
+            <div class="wish-panel-header">
+                <div class="wish-panel-title">
+                    <i class="bi bi-heart-fill"></i>
+                    <span id="wishFriendPanelName"></span>
+                </div>
+
+                <button type="button"
+                        id="wishFriendPanelClose"
+                        class="country-panel-close">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div id="wishFriendTicketGrid" class="country-ticket-grid">
+
+                <div class="wish-ticket d-none">
+
+                    <div class="wish-ticket-header">
+                        <i class="bi bi-heart-fill wish-ticket-heart"></i>
+                        <div class="wish-ticket-city"></div>
+                    </div>
+
+                    <div class="ticket-divider">
+                        <div class="right-hole"></div>
+                        <div class="ticket-hole top"></div>
+                        <div class="ticket-hole bottom"></div>
+                    </div>
+
+                    <div class="wish-ticket-body">
+                        <div class="wish-ticket-row">
+                            <span class="wish-ticket-label mr-2">PERIOD</span>
+                            <span class="wish-ticket-count"></span>
+                        </div>
+                        <div class="wish-ticket-row">
+                            <span class="wish-ticket-label mr-2">DATE</span>
+                            <span class="wish-ticket-period"></span>
+                        </div>
+                        <div class="wish-ticket-memo"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
 
     <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
@@ -214,8 +201,79 @@
     <script src="https://unpkg.com/lucide@latest"></script>
 
     <script th:inline="javascript">
+        function  openWishFriendPanel(countryCode){
+            if (!countryCode) {
+                alert("국가 코드 확인");
+                return;
+            }
+            const countryName = countryNameMap[countryCode] || countryCode;
+            $("#wishFriendPanelName").text(countryName);
 
-        function openCountryPanel(countryCode) {
+            renderCountryTickets([]);
+
+            $("#countryListFriendPanel").removeClass("show");
+
+            setTimeout(function () {
+                $("#countryListFriendPanel").addClass("hidden");
+            }, 220);
+
+            setTimeout(function () {
+                $("#WishListFriendPanel").removeClass("hidden");
+
+                setTimeout(function () {
+                    $("#WishListFriendPanel").addClass("show");
+                }, 10);
+            }, 230);
+
+            $.ajax({
+                url: "/mypage/" + friendId + "/wishlist/tickets",
+                type: "GET",
+                data: {countryCode: countryCode},
+                dataType: "json",
+
+                success: function (response) {
+                    if (response.result == "success") {
+                        renderWishTickets(response.data);
+                    }else{
+                        alert("티켓 조회 실패");
+                        renderWishTickets([]);
+                    }
+                }, error: function () {
+                    alert(("티켓 조회 에러"));
+                    renderWishTickets([]);
+                }
+
+            });
+
+        }
+
+        function renderWishTickets(wishList) {
+
+            const $grid = $("#wishFriendTicketGrid");
+            $grid.find(".wish-ticket.generated").remove();
+            const $template = $grid.find(".wish-ticket.d-none").first();
+            if ($template.length === 0) {
+                return;
+            }
+            $.each(wishList, function (index, wish) {
+
+                const $ticket = $template.clone();
+
+                $ticket.removeClass("d-none").addClass("generated");
+                $ticket.attr("data-wishlist-id", wish.id);
+                $ticket.find(".wish-ticket-city").text(wish.cityName);
+                $ticket.find(".wish-ticket-count").text(wish.period);
+                $ticket.find(".wish-ticket-period").text(
+                    (wish.startDate ? formatDate(wish.startDate) : "")
+                    + (wish.endDate ? " ~ " + formatDate(wish.endDate) : "")
+                );
+
+                $ticket.find(".wish-ticket-memo").text(wish.memo ? wish.memo : "메모 없음");
+
+                $grid.append($ticket);
+            });
+        }
+        function openCountryFriendPanel(countryCode) {
 
             if (!countryCode) {
                 alert("국가 코드 확인");
@@ -224,13 +282,21 @@
             const countryName = countryNameMap[countryCode] || countryCode;
             $("#countryFriendPanelName").text(countryName);
 
-            renderCountryTickets([]);
+            renderWishTickets([]);
 
-            $("#countryListFriendPanel").removeClass("hidden");
+            $("#WishListFriendPanel").removeClass("show");
 
             setTimeout(function () {
-                $("#countryListFriendPanel").addClass("show");
-            }, 10);
+                $("#WishListFriendPanel").addClass("hidden");
+            }, 220);
+
+            setTimeout(function () {
+                $("#countryListFriendPanel").removeClass("hidden");
+
+                setTimeout(function () {
+                    $("#countryListFriendPanel").addClass("show");
+                }, 10);
+            }, 230);
 
             $.ajax({
                 url:  "/mypage/" + friendId + "/post/tickets",
@@ -504,7 +570,7 @@
 
                         const countryCode = dataContext.id;
 
-                        openCountryPanel(countryCode);
+                        openCountryFriendPanel(countryCode);
                     }
                 );
 
@@ -539,7 +605,20 @@
 
 
                     container.children.push(circle);
+                    container.events.on("click", function (event) {
+                        const dataItem = event.target.dataItem;
+                        if (!dataItem) {
+                            return;
+                        }
+                        const dataContext = dataItem.dataContext;
 
+                        const countryCode = dataContext.countryCode;
+                        if (!countryCode) {
+                            alert("게시물 데이터 없음");
+                            return;
+                        }
+                        openWishFriendPanel(countryCode);
+                    });
 
                     return am5.Bullet.new(root, {
                         sprite: container
@@ -588,6 +667,22 @@
                     });
 
                     container.children.push(circle);
+
+                    container.events.on("click", function (event) {
+                        const dataItem = event.target.dataItem;
+                        if (!dataItem) {
+                            return;
+                        }
+                        const dataContext = dataItem.dataContext;
+
+                        const countryCode = dataContext.countryCode;
+                        if (!countryCode) {
+                            alert("게시물 데이터 없음");
+                            return;
+                        }
+                        openCountryFriendPanel(countryCode);
+                    });
+
                     return am5.Bullet.new(root, {
                         sprite: container
                     });
@@ -636,6 +731,7 @@
 
             openPostDetailModal(postId);
         });
+
         function adjustVerticalLocationFontSize() {
             const el = document.getElementById("verticalLocation");
 
@@ -672,7 +768,7 @@
                     if (window.lucide) {
                         lucide.createIcons();
                     }
-                    adjustVerticalLocationFontSize($modal);
+                    adjustVerticalLocationFontSize();
                     if (window.Swiper) {
                         new Swiper($modal.find('.modal-swiper')[0], {
                             pagination: {
@@ -792,7 +888,12 @@
                 $("#countryListFriendPanel").addClass("hidden");
             }, 220);
         });
-
+        $("#wishFriendPanelClose").on("click", function () {
+            $("#WishListFriendPanel").removeClass("show");
+            setTimeout(function () {
+                $("#WishListFriendPanel").addClass("hidden");
+            }, 220);
+        });
 
     </script>
 

@@ -1057,13 +1057,41 @@ main {
 .ticket-img-wrap {
     padding: 10px;
 }
+
 .country-ticket-img {
     width: 100%;
     height: 140px;
     object-fit: cover;
     border-radius: 12px;
 }
+.country-ticket-menu {
+    position: absolute;
+    top: 8px;
+    right: 8px;
 
+    width: 32px;
+    height: 32px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.85);
+    color: #555;
+
+    font-size: 20px;
+    cursor: pointer;
+
+    z-index: 10;
+}
+
+.country-ticket-menu:hover {
+    background: #fff;
+    color: #000;
+}
 .ticket-divider {
     position: relative;
     height: 24px;
@@ -1675,4 +1703,139 @@ main {
     width: 10px;
     height: 10px;
     flex-shrink: 0;
+}
+
+.wish-panel-header{
+    height: 74px;
+    background: #f296f2;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
+    padding: 0 16px;
+}
+.wish-panel-title{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    font-size: 20px;
+}
+.wish-ticket-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    padding: 20px;
+    height: calc(100% - 80px);
+    overflow-y: auto;
+    align-content: start;
+}
+.wish-panel-header::after{
+    content:"";
+    position:absolute;
+    left: 22px;
+    right: 22px;
+    bottom: 12px;
+    border-bottom: 3px dotted rgba(255,255,255,0.55);
+}
+.wish-ticket {
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.wish-ticket:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(242, 150, 242, 0.35);
+}
+
+.wish-ticket-header {
+    background: linear-gradient(135deg, #f296f2, #c86ee0);
+    color: #fff;
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+}
+
+.wish-ticket-heart {
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+
+.wish-ticket-city {
+    font-weight: 700;
+    font-size: 1.05rem;
+    flex: 1;
+    white-space: normal;
+    word-break: keep-all;
+    line-height: 1.3;
+}
+
+
+.wish-ticket-menu {
+    background: transparent;
+    border: none;
+    color: #fff;
+    opacity: 0.85;
+    cursor: pointer;
+    padding: 2px 4px;
+}
+
+.wish-ticket-menu:hover {
+    opacity: 1;
+}
+
+.wish-ticket-body {
+    padding: 14px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.wish-ticket-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.wish-ticket-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #b98fd1;
+    letter-spacing: 0.05em;
+}
+
+.wish-ticket-count {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.wish-ticket-period {
+    font-size: 0.85rem;
+    color: #666;
+    white-space: normal;
+    word-break: keep-all;
+}
+
+.wish-ticket-memo {
+    margin-top: 6px;
+    font-size: 0.82rem;
+    color: #888;
+    background: #faf4fc;
+    border-radius: 8px;
+    padding: 8px 10px;
+    line-height: 1.4;
+    white-space: normal;
+    word-break: keep-all;
 }

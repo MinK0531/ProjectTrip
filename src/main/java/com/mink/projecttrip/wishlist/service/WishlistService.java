@@ -174,23 +174,58 @@ public class WishlistService {
             if(wishlist.getLatitude()== 0 && wishlist.getLongitude()== 0){
                 continue;
             }
-            String countryName = countryRepository.findById(wishlist.getCountryId())
-                    .map(Country::getCountryNameKo)
-                    .orElse("알 수 없는 나라");
+            Optional<Country> optionalCountry = countryRepository.findById(wishlist.getCountryId());
 
+
+            Country country = optionalCountry.get();
             pointList.add(
                     WishlistMapPoint.builder()
                             .wishlistId(wishlist.getId())
                             .latitude(wishlist.getLatitude())
                             .longitude(wishlist.getLongitude())
                             .cityName(wishlist.getCityName())
-                            .countryName(countryName)
+                            .countryName(country.getCountryNameKo())
+                            .countryCode(country.getCountryCode())
                             .build()
 
             );
         }
         return pointList;
 
+    }
+    @Transactional
+    public List<WishlistDetail>  getCountryWishList(long userId, String countryCode){
+        User user = userService.getUserById(userId);
+        if(user == null){
+            return new ArrayList<>();
+        }
+        Optional<Country> optionalCountry = countryRepository.findByCountryCode(countryCode);
+        if(optionalCountry.isEmpty()){
+            return new ArrayList<>();
+        }
+        Country country = optionalCountry.get();
+
+        List<Wishlist> wishlistList = wishlistRepository.findByUserIdAndCountryIdOrderByIdDesc(userId, country.getId());
+
+        List<WishlistDetail> ticketList = new ArrayList<>();
+        for (Wishlist wishlist : wishlistList) {
+            ticketList.add(WishlistDetail.builder()
+                    .id(wishlist.getId())
+                    .userId(wishlist.getUserId())
+                    .countryId(wishlist.getCountryId())
+                    .nickName(user.getNickName())
+                    .countryName(country.getCountryNameKo())
+                    .cityName(wishlist.getCityName())
+                    .memo(wishlist.getMemo())
+                    .period(wishlist.getPeriod())
+                    .startDate(wishlist.getStartDate())
+                    .endDate(wishlist.getEndDate())
+                    .latitude(wishlist.getLatitude())
+                    .longitude(wishlist.getLongitude())
+                    .createdAt(wishlist.getCreatedAt())
+                    .build());
+        }
+        return ticketList;
     }
 
 

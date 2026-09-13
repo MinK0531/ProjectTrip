@@ -117,10 +117,7 @@ public class PostService {
             boolean isLike = likeService.isLikeByPostIdAndUserId(post.getId(), userId);
             List<CommentDetail> commentList = commentService.getCommentList(post.getId(),userId);
 
-            List<PostImage> images = postImageRepository
-                    .findAllByPostIdOrderBySortOrderAsc(
-                            post.getId()
-                    );
+            List<PostImage> images = postImageRepository.findAllByPostIdOrderBySortOrderAsc(post.getId());
 
             List<PostImageDetail> imageList = images.stream()
                     .map(image ->
@@ -327,9 +324,7 @@ public class PostService {
     }
 
     @Transactional
-    public List<PostTicketDetail> getCountryPostList(
-            long userId,
-            String countryCode) {
+    public List<PostTicketDetail> getCountryPostList(long userId, String countryCode) {
 
         User user = userService.getUserById(userId);
 
@@ -337,47 +332,32 @@ public class PostService {
             return new ArrayList<>();
         }
 
-        Optional<Country> optionalCountry =
-                countryRepository.findByCountryCode(countryCode);
+        Optional<Country> optionalCountry = countryRepository.findByCountryCode(countryCode);
 
         if (optionalCountry.isEmpty()) {
             return new ArrayList<>();
         }
-
         Country country = optionalCountry.get();
-
-        List<Post> postList = postRepository.findByUserIdAndCountryIdOrderByIdDesc(
-                        userId,
-                        country.getId()
-                );
-
+        List<Post> postList = postRepository.findByUserIdAndCountryIdOrderByIdDesc(userId, country.getId());
         List<PostTicketDetail> ticketList = new ArrayList<>();
-
         for (Post post : postList) {
-
             if (post.getLatitude() == 0 && post.getLongitude() == 0) {
                 continue;
             }
-
-            Optional<PostImage> firstImage =
-                    postImageRepository.findFirstByPostIdOrderBySortOrderAsc(
-                            post.getId()
-                    );
+            Optional<PostImage> firstImage = postImageRepository.findFirstByPostIdOrderBySortOrderAsc(post.getId());
 
             String imageUrl = "/img/profile.png";
-
             if (firstImage.isPresent()) {
                 imageUrl = firstImage.get().getImagePath();
             }
 
-            ticketList.add(
-                    PostTicketDetail.builder()
-                            .postId(post.getId())
-                            .imageUrl(imageUrl)
-                            .createdAt(post.getCreatedAt())
-                            .fromCountryCode(user.getCountryCode())
-                            .toCountryCode(country.getCountryCode())
-                            .build()
+            ticketList.add(PostTicketDetail.builder()
+                    .postId(post.getId())
+                    .imageUrl(imageUrl)
+                    .createdAt(post.getCreatedAt())
+                    .fromCountryCode(user.getCountryCode())
+                    .toCountryCode(country.getCountryCode())
+                    .build()
             );
         }
 

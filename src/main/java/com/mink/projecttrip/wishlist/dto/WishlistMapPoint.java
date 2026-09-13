@@ -14,4 +14,5 @@ public class WishlistMapPoint {
     private double longitude;
     private String cityName;
     private String countryName;
+    private String countryCode;
 }

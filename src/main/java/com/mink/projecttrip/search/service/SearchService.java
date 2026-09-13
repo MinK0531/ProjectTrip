@@ -36,6 +36,13 @@ public class SearchService {
     private final FriendRepository friendRepository;
     private final FriendRequestRepository friendRequestRepository;
 
+    private final PostRepository postRepository;
+    private final PostImageRepository postImageRepository;
+    private final UserService userService;
+    private final LikeService likeService;
+    private final CommentService commentService;
+    private final CountryRepository countryRepository;
+
     @Transactional
     public List<SearchUser> searchUsers(String keyword, Long currentUserId) {
         List<User> userList = userRepository.findByNickNameContaining(keyword);
@@ -73,7 +80,146 @@ public class SearchService {
         }
         return result;
     }
+    @Transactional
+    public List<PostDetail> searchCountryPosts(String keyword, Long currentUserId) {
 
+        List<Country> countries = countryRepository.findByCountryNameKoContainingIgnoreCase(keyword);
 
+        if (countries.isEmpty()) {
+            return List.of();
+        }
+        List<Long> countryIds = countries.stream().map(Country::getId).toList();
+
+        List<Post> posts = postRepository.findByCountryIdInOrderByIdDesc(countryIds);
+
+        List<PostDetail> result = new ArrayList<>();
+
+        for (Post post : posts) {
+            if (post.getUserId()==currentUserId) {
+                continue;
+            }
+            User user = userService.getUserById(post.getUserId());
+            if (user == null) {
+                continue;
+            }
+
+            int likeCount = likeService.countByPostId(post.getId());
+
+            boolean isLike = likeService.isLikeByPostIdAndUserId(post.getId(), currentUserId);
+
+            List<CommentDetail> commentList = commentService.getCommentList(post.getId(), currentUserId);
+
+            List<PostImage> images = postImageRepository.findAllByPostIdOrderBySortOrderAsc(post.getId());
+
+            List<PostImageDetail> imageList =
+                    images.stream()
+                            .map(image ->
+                                    PostImageDetail.builder()
+                                            .id(image.getId())
+                                            .imagePath(image.getImagePath())
+                                            .sortOrder(image.getSortOrder())
+                                            .build()
+                            )
+                            .toList();
+
+            String countryName = countryRepository.findById(post.getCountryId()).map(Country::getCountryNameKo).orElse(null);
+
+            UserProfile profile =
+                    userProfileRepository.findByUserId(user.getId());
+
+            String profileImg = "/img/profile.png";
+
+            if (profile != null
+                    && profile.getProfileImg() != null
+                    && !profile.getProfileImg().isBlank()) {
+                profileImg = profile.getProfileImg();
+            }
+
+            PostDetail postDetail =
+                    PostDetail.builder()
+                            .id(post.getId())
+                            .userId(post.getUserId())
+                            .countryId(post.getCountryId())
+                            .nickName(user.getNickName())
+                            .countryName(countryName)
+                            .cityName(post.getCityName())
+                            .contents(post.getContents())
+                            .atmosphere(post.getAtmosphere())
+                            .placeName(post.getPlaceName())
+                            .musicUrl(post.getMusicUrl())
+                            .latitude(post.getLatitude())
+                            .longitude(post.getLongitude())
+                            .createdAt(post.getCreatedAt())
+                            .imageList(imageList)
+                            .commentCount(commentList.size())
+                            .profileImg(profileImg)
+                            .likeCount(likeCount)
+                            .isLike(isLike)
+                            .build();
+
+            result.add(postDetail);
+        }
+
+        return result;
+    }
+    @Transactional
+    public List<PostDetail> searchPosts(String keyword, Long currentUserId){
+
+        List<Post> PostList = postRepository.findByContentsContainingIgnoreCaseOrderByIdDesc(keyword);
+        List<PostDetail> result = new ArrayList<>();
+
+        for(Post post : PostList) {
+            if (post.getUserId()==currentUserId) {
+                continue;
+            }
+            User user = userService.getUserById(post.getUserId());
+            if (user == null) {
+                continue;
+            }
+
+            int likeCount = likeService.countByPostId(post.getId());
+            boolean isLike = likeService.isLikeByPostIdAndUserId(post.getId(), currentUserId);
+            List<CommentDetail> commentList = commentService.getCommentList(post.getId(), currentUserId);
+
+            List<PostImage> images = postImageRepository.findAllByPostIdOrderBySortOrderAsc(post.getId());
+
+            List<PostImageDetail> imageList = images.stream().map(image ->
+                            PostImageDetail.builder()
+                                    .id(image.getId())
+                                    .imagePath(image.getImagePath())
+                                    .sortOrder(image.getSortOrder())
+                                    .build())
+                    .toList();
+
+            String countryName = countryRepository.findById(post.getCountryId()).map(Country::getCountryNameKo).orElse(null);
+
+            UserProfile profile = userProfileRepository.findByUserId(user.getId());
+            String profileImg = profile != null ? profile.getProfileImg() : "/img/profile.png";
+
+            PostDetail postDetail = PostDetail.builder()
+                    .id(post.getId())
+                    .userId(post.getUserId())
+                    .countryId(post.getCountryId())
+                    .nickName(user.getNickName())
+                    .countryName(countryName)
+                    .cityName(post.getCityName())
+                    .contents(post.getContents())
+                    .atmosphere(post.getAtmosphere())
+                    .placeName(post.getPlaceName())
+                    .musicUrl(post.getMusicUrl())
+                    .latitude(post.getLatitude())
+                    .longitude(post.getLongitude())
+                    .createdAt(post.getCreatedAt())
+                    .imageList(imageList)
+                    .commentCount(commentList.size())
+                    .profileImg(profileImg)
+                    .likeCount(likeCount)
+                    .isLike(isLike)
+                    .build();
+            result.add(postDetail);
+        }
+        return result;
+
+    }
 
 }

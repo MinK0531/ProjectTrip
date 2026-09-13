@@ -37,13 +37,19 @@ public class SearchRestController {
         if (keyword == null || keyword.isBlank()) {
             Map<String, Object> result = new HashMap<>();
             result.put("users", List.of());
+            result.put("posts", List.of());
+            result.put("countryPosts", List.of());
             return ApiResponse.success("검색어를 입력해주세요.", result);
         }
 
         keyword = keyword.trim();
         List<SearchUser> users = searchService.searchUsers(keyword, userId);
+        List<PostDetail> posts = searchService.searchPosts(keyword, userId);
+        List<PostDetail> countryPosts = searchService.searchCountryPosts(keyword, userId);
         Map<String, Object> result = new HashMap<>();
         result.put("users", users);
+        result.put("posts", posts);
+        result.put("countryPosts", countryPosts);
         return ApiResponse.success("검색 성공", result);
     }
 

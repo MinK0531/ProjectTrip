@@ -45,11 +45,18 @@ public class UserProfileService {
         UserProfile profile = userProfileRepository.findByUserId(userId);
 
         if (profile == null) {
+            String profileImgPath = "/img/profile.png";
+
+            if (profileImg != null && !profileImg.isEmpty()) {
+                profileImgPath = FileManager.saveFile(userId, profileImg);
+            }
+
             profile = UserProfile.builder()
                     .userId(userId)
                     .profileWord(profileWord)
-                    .profileImg("/img/profile.png")
+                    .profileImg(profileImgPath)
                     .build();
+
         } else {
             profile.setProfileWord(profileWord);
 

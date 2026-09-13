@@ -6,11 +6,11 @@
 <head>
     <link rel="stylesheet"
           href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
 <div layout:fragment="content">
-    <main class="bg-gray-50 pt-16">
+    <div class="bg-gray-50 pt-16">
         <div id="app" class="max-w-3xl mx-auto px-4 py-8">
 
             <div class="bg-white rounded-3xl shadow-xl border border-gray-100 p-6 mb-8 sticky top-20 z-40">
@@ -81,6 +81,95 @@
                         <div id="postList" class="grid gap-6"></div>
                     </div>
 
+                    <template id="postItemTemplate">
+
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative mb-4">
+
+                            <div class="border-t border-gray-300 border-b relative h-20 flex items-center px-4 overflow-hidden">
+                                <div class="flex items-center gap-3 z-10">
+                                    <div class="w-12 h-12 rounded-full border-2 border-gray-100 overflow-hidden bg-orange-100">
+                                        <img src="/img/profile.png" alt="Profile" class="w-full h-full object-cover post-profile-img">
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-lg post-nickname">User</p>
+                                        <div class="flex items-center gap-2 text-sm text-gray-500">
+                                            <i data-lucide="globe" class="w-3.5 h-3.5"></i>
+                                            <span class="post-country-name">나라</span>
+                                            <span class="text-xs post-created-at"></span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="absolute right-0 top-0 h-full w-1/2 bg-blue-50 border-l border-b border-blue-200 polygon post-location-info hidden">
+                                    <div class="h-full flex flex-col justify-center pl-12 pr-4">
+                                        <div class="space-y-1 gap-1.5">
+
+                                            <div class="flex gap-1.5 post-city-container hidden">
+                                                <i data-lucide="map-pin" class="w-5 h-5 text-blue-600"></i>
+                                                <p class="font-bold text-blue-900 text-sm post-city-name"></p>
+                                            </div>
+
+                                            <p class="ml-3 text-blue-600 text-xs post-place-name hidden"></p>
+                                            <p class="ml-4 text-blue-500 text-[10px] post-atmosphere hidden"></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                            <div class="relative bg-gray-50 aspect-square overflow-hidden w-full min-w-0">
+
+                                <div class="swiper feed-swiper post-swiper w-full h-full min-w-0">
+                                    <div class="swiper-wrapper post-swiper-wrapper w-full h-full" style="display: flex;">
+                                    </div>
+                                    <div class="swiper-pagination"></div>
+                                </div>
+
+
+                                <div class="post-empty-image w-full h-full flex flex-col items-center justify-center text-gray-300 hidden">
+                                    <i data-lucide="image-off" class="w-16 h-16 mb-2"></i>
+                                    <p class="text-sm">이미지가 없습니다</p>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-gray-300 p-3 pl-1 pr-1 space-y-3">
+                                <div class="flex justify-between items-center">
+                                    <div class="flex items-center gap-1.5 transition-opacity">
+
+                                        <span class="count-text">Like : </span>
+                                        <span class="count-text post-like-count">0</span>
+                                        <button type="button" class="open-post-detail ml-2" data-post-id="">
+                                            <i class="bi bi-chat text-dark btn-like-icon icon-stroke-thick"></i>
+                                        </button>
+                                        <span class="count-text post-comment-count">0</span>
+                                        <button type="button" class="ml-3">
+                                            <i class="bi bi-share text-dark btn-like-icon icon-stroke-thick"></i>
+
+                                        </button>
+
+                                        <button type="button" class="ml-3">
+                                            <i class="bi bi-send text-dark btn-like-icon icon-stroke-thick"></i>
+                                        </button>
+                                    </div>
+                                    <button type="button">
+                                        <i class="bi bi-bookmark text-dark btn-like-icon icon-stroke-thick"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-2 text-m mb-3 ml-3">
+                                <span class="font-bold post-nickname-content">User</span>
+                                <span class="post-contents">내용</span>
+                            </div>
+
+                            <div class="post-music flex items-center gap-2 text-xs text-blue-600 bg-blue-50 px-3 py-2 rounded-lg hidden">
+                                <i data-lucide="music" class="w-4 h-4"></i>
+                                <span class="m-2 post-music-url"></span>
+                            </div>
+                        </div>
+                    </template>
+
                     <div id="countryPostSection" class="hidden">
                         <h3 class="text-sm font-bold text-gray-400 mb-4 px-2 uppercase tracking-wider">
                             Countries
@@ -95,86 +184,449 @@
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 
     <script>
-        $(function (){
 
-            const $searchInput = $("#searchInput");
-            const $tabButtons = $("#tabContainer .tab-btn");
-            const $userSection = $('#userSection');
-            const $userList = $('#userList');
-            const $userItemTemplate = $('#userItemTemplate');
-
-            const $postSection = $('#postSection');
-            const $countryPostSection = $('#countryPostSection');
+        $(function () {
 
             let currentTab = "all";
             let debounceTimer = null;
-            let lastKeyword = "";
 
-            $tabButtons.on("click", function () {
+            let searchUsers = [];
+            let searchPosts = [];
+            let searchCountryPosts = [];
+
+            const $searchInput = $("#searchInput");
+            const $postList = $("#postList");
+            const $postItemTemplate = $("#postItemTemplate");
+
+            $("#tabContainer .tab-btn").on("click", function () {
                 currentTab = $(this).data("tab");
-                $tabButtons.removeClass('bg-white shadow-md text-blue-600').addClass('text-gray-500');
-                $(this).addClass('bg-white shadow-md text-blue-600').removeClass('text-gray-500');
+                $("#tabContainer .tab-btn").removeClass("bg-white shadow-md text-blue-600").addClass("text-gray-500");
+                $(this).addClass("bg-white shadow-md text-blue-600").removeClass("text-gray-500");
 
-                if (currentTab == "all") {
-                    $userSection.toggleClass("hidden", $userList.children().length == 0);
-                    $postSection.addClass("hidden");
-                    $countryPostSection.addClass("hidden");
-                } else if (currentTab == "users") {
-                    $userSection.toggleClass("hidden", $userList.children().length == 0);
-                    $postSection.addClass("hidden");
-                    $countryPostSection.addClass("hidden");
-                } else if (currentTab == "countries") {
-                    $userSection.addClass('hidden');
-                    $postSection.addClass('hidden');
-                    $countryPostSection.addClass('hidden');
-                }
+                renderCurrentTab();
+
             });
+
 
             $searchInput.on("input", function () {
                 const keyword = $(this).val().trim();
                 clearTimeout(debounceTimer);
 
-                if (keyword === '') {
-                    $userList.empty();
-                    $userSection.addClass("hidden");
-                    $('#searchResults').addClass('hidden');
-                    $('#emptyState').removeClass('hidden');
+
+                if (keyword === "") {
+
+                    searchUsers = [];
+                    searchPosts = [];
+                    searchCountryPosts = [];
+
+                    $("#userList").empty();
+                    $("#postList").empty();
+                    $("#countryPostList").empty();
+
+                    $("#userSection").addClass("hidden");
+                    $("#postSection").addClass("hidden");
+                    $("#countryPostSection").addClass("hidden");
+                    $("#noResults").addClass("hidden");
+
+                    $("#searchResults").addClass("hidden");
+                    $("#emptyState").removeClass("hidden");
+
                     return;
                 }
+                sessionStorage.setItem("searchKeyword", keyword);
 
-                debounceTimer = setTimeout(() => {
-                    lastKeyword = keyword;
-
+                debounceTimer = setTimeout(function () {
                     $.ajax({
-                        url: '/search/search',
-                        method: 'GET',
-                        dataType: 'json',
-                        data: { keyword: keyword },
+                        url: "/search/search",
+                        type: "GET",
+                        dataType: "json",
+                        data: {keyword: keyword},
                         success: function (response) {
                             if (response.result == "success") {
                                 const data = response.data || {};
-                                const users = data.users || [];
+                                searchUsers = data.users || [];
+                                searchPosts = data.posts || [];
+                                searchCountryPosts = data.countryPosts || [];
 
-                                $('#emptyState').addClass('hidden');
-                                $('#searchResults').removeClass('hidden');
+                                $("#emptyState").addClass("hidden");
+                                $("#searchResults").removeClass("hidden");
 
-                                renderUsers(users);
+                                renderUsers(searchUsers);
+                                renderPosts(searchPosts);
+                                renderCountryPosts(searchCountryPosts);
+                                renderCurrentTab();
+                            }else{
+                                alert("검색 실패")
+                            }
+                        },error: function () {
+                            alert("검색 오류");
+                        }
+                    });
+                }, 300);
+            });
 
 
+            function renderCurrentTab() {
+
+                if (currentTab === "all") {
+                    const hasUsers = searchUsers.length > 0;
+                    const hasPosts = searchPosts.length > 0;
+                    const hasCountryPosts = searchCountryPosts.length > 0;
+                    $("#userSection").toggleClass("hidden", !hasUsers);
+                    $("#postSection").toggleClass("hidden", !hasPosts);
+                    $("#countryPostSection").toggleClass("hidden", !hasCountryPosts);
+                    $("#noResults").toggleClass("hidden", hasUsers || hasPosts || hasCountryPosts);
+
+                } else if (currentTab === "users") {
+                    const hasUsers = searchUsers.length > 0;
+                    $("#userSection").toggleClass("hidden", !hasUsers);
+                    $("#postSection").addClass("hidden");
+                    $("#countryPostSection").addClass("hidden");
+                    $("#noResults").toggleClass("hidden", hasUsers);
+                } else if (currentTab === "countries") {
+                    const hasCountryPosts = searchCountryPosts.length > 0;
+                    $("#userSection").addClass("hidden");
+                    $("#postSection").addClass("hidden");
+                    $("#countryPostSection").toggleClass("hidden",!hasCountryPosts);
+                    $("#noResults").toggleClass("hidden", hasCountryPosts);
+                }
+
+
+            }
+
+            function renderUsers(users) {
+                const $userList = $("#userList");
+                $userList.empty();
+                if (!users || users.length === 0) {
+                    $("#userSection").addClass("hidden");
+                    return;
+                }
+
+                users.forEach(function (user) {
+                    const $node = $($("#userItemTemplate").prop("content")).clone();
+
+                    const profileImg = user.profileImg || "/img/profile.png";
+
+                    $node.find(".user-profile-img").attr("src", profileImg)
+                        .on("error", function () {
+                            $(this).attr("src", "/img/profile.png");
+                        });
+
+                    $node.find(".user-nickname").text(user.nickName);
+                    const $button = $node.find(".friend-request-btn");
+
+                    $button.attr("data-user-id", user.id);
+
+
+                    if (user.friend) {
+                        $button.remove();
+                        $node.find(".user-search-item").addClass("cursor-pointer")
+                            .on("click", function () {
+                                location.href = "/friend/" + user.id;
+                            });
+                    } else if (user.requestSent) {
+                        $button
+                            .text("요청 완료")
+                            .prop("disabled", true)
+                            .removeClass("btn-primary")
+                            .addClass("btn-secondary");
+                    }
+                    $userList.append($node);
+                });
+
+                $("#userSection").removeClass("hidden");
+
+                if (typeof lucide !== "undefined") {
+                    lucide.createIcons();
+                }
+            }
+
+
+
+            function renderCountryPosts(posts) {
+
+                const $countryPostList = $("#countryPostList");
+                $countryPostList.empty();
+                if (!posts || posts.length === 0) {
+                    $("#countryPostSection").addClass("hidden");
+                    return;
+                }
+                posts.forEach(function (post) {
+                    const $node = $($postItemTemplate.prop("content")).clone();
+                    const postId = post.id;
+                    const profileImg = post.profileImg || "/img/profile.png";
+                    const nickname = post.nickName;
+                    const countryName = post.countryName;
+                    const cityName = post.cityName;
+                    const placeName = post.placeName;
+                    const atmosphere = post.atmosphere;
+                    const contents = post.contents ;
+                    const musicUrl = post.musicUrl;
+
+
+                    $node.find(".post-profile-img").attr("src", profileImg).on("error", function () {
+                            $(this).attr("src", "/img/profile.png");
+                        });
+
+                    $node.find(".post-nickname").text(nickname);
+                    $node.find(".post-nickname-content").text(nickname);
+                    $node.find(".post-country-name").text(countryName);
+
+                    if (post.createdAt) {
+                        $node.find(".post-created-at").text(formatPostDate(post.createdAt)
+                        );
+                    }
+
+                    const hasLocation = cityName || placeName || atmosphere;
+                    if (hasLocation) {
+                        $node.find(".post-location-info").removeClass("hidden");
+                    }
+                    if (cityName) {
+                        $node.find(".post-city-container").removeClass("hidden");$node.find(".post-city-name").text(cityName);
+                    }
+                    if (placeName) {$node.find(".post-place-name").removeClass("hidden").text(placeName);
+                    }
+
+                    if (atmosphere) {
+                        $node.find(".post-atmosphere").removeClass("hidden").text(atmosphere);
+                    }
+                    $node.find(".post-contents").text(contents);
+
+                    const $likeIcon = $node.find(".like-btn");
+                    const $likeCount = $node.find(".post-like-count");
+                    $likeCount.text(post.likeCount || 0);
+
+                    if (post.isLike) {
+                        $likeIcon.removeClass("bi-heart like-btn").addClass("bi-heart-fill text-danger unlike-btn");
+                    } else {
+                        $likeIcon.removeClass("bi-heart-fill text-danger unlike-btn").addClass("bi-heart like-btn");
+                    }
+                    $node.find(".post-comment-count").text(post.commentCount || 0);
+
+                    if (musicUrl) {
+                        $node.find(".post-music").removeClass("hidden");
+                        $node.find(".post-music-url").text(musicUrl);
+                    }
+
+                    $node.find("[data-post-id]").attr("data-post-id", postId);
+
+                    renderPostImages($node, post.imageList || []);
+
+                    $node.find(".open-post-detail").on("click", function () {
+                        const targetPostId = $(this).data("post-id");
+
+                        if (!targetPostId) {
+                            return;
+                        }
+                        openPostDetailModal(targetPostId);
+                    });
+                    $countryPostList.append($node);
+                });
+                $("#countryPostSection").removeClass("hidden");
+
+                if (typeof lucide !== "undefined") {
+                    lucide.createIcons();
+                }
+
+                $countryPostList.find(".post-swiper").each(function () {
+
+                    if (!this.swiper) {
+
+                        new Swiper(this, {
+                            loop: false,
+                            pagination: {
+                                el: $(this)
+                                    .find(".swiper-pagination")
+                                    .get(0),
+                                clickable: true
+                            }
+                        });
+                    }
+                });
+            }
+            $("#userList").on("click", ".friend-request-btn", function (event) {
+                    event.stopPropagation();
+                    const $button = $(this);
+                    const toUserId = $button.data("user-id");
+
+                    $.ajax({
+                        url: "/friend/request",
+                        type: "POST",
+                        data: {toUserId: toUserId},
+                        success: function (response) {
+                            if (response.result == "success") {
+                                $button.text("요청 완료").prop("disabled", true)
+                                    .removeClass("btn-primary").addClass("btn-secondary");
                             } else {
-                                alert("검색 실패");
+                                alert("친구 요청 실패");
                             }
                         },
                         error: function () {
-                            alert("검색 에러");
+                            alert("친구 요청 에러 ");
                         }
                     });
+                }
+            );
 
-                }, 300);
-            });
+
+            function renderPosts(posts) {
+                $postList.empty();
+                if (!posts || posts.length === 0) {
+                    $("#postSection").addClass("hidden");
+                    return;
+                }
+                posts.forEach(function (post) {
+                    const $node = $($postItemTemplate.prop("content")).clone();
+                    const postId = post.id;
+                    const profileImg = post.profileImg;
+                    const nickname = post.nickName ;
+                    const countryName = post.countryName ;
+                    const cityName = post.cityName ;
+                    const placeName = post.placeName;
+                    const atmosphere = post.atmosphere ;
+                    const contents = post.contents ;
+                    const musicUrl = post.musicUrl ;
+
+
+                    $node.find(".post-profile-img").attr("src", profileImg)
+                        .on("error", function () {
+                            $(this).attr("src", "/img/profile.png");
+                        });
+
+                    $node.find(".post-nickname").text(nickname);
+                    $node.find(".post-nickname-content").text(nickname);
+                    $node.find(".post-country-name").text(countryName);
+
+                    if (post.createdAt) {
+                        $node.find(".post-created-at").text(
+                            formatPostDate(post.createdAt)
+                        );
+                    }
+                    const hasLocation = cityName || placeName || atmosphere;
+                    if (hasLocation) {
+                        $node.find(".post-location-info").removeClass("hidden");
+                    }
+                    if (cityName) {
+                        $node.find(".post-city-container").removeClass("hidden");
+                        $node.find(".post-city-name").text(cityName);
+                    }
+                    if (placeName) {
+                        $node.find(".post-place-name").removeClass("hidden").text(placeName);
+
+                    }
+
+                    if (atmosphere) {
+                        $node.find(".post-atmosphere").removeClass("hidden").text(atmosphere);
+                    }
+
+                    $node.find(".post-contents").text(contents);
+
+                    const $likeIcon = $node.find(".post-like-icon");
+                    const $likeCount = $node.find(".post-like-count");
+                    $likeCount.text(post.likeCount || 0);
+
+                    if (post.isLike) {
+                        $likeIcon.removeClass("bi-heart").addClass("bi-heart-fill text-danger");
+                    } else {
+                        $likeIcon.removeClass("bi-heart-fill text-danger").addClass("bi-heart");
+                    }
+
+                    $node.find(".post-comment-count").text(post.commentCount || 0);
+
+                    if (musicUrl) {
+                        $node.find(".post-music").removeClass("hidden");
+                        $node.find(".post-music-url").text(musicUrl);
+                    }
+
+                    $node.find("[data-post-id]").attr("data-post-id", postId);
+
+
+                    renderPostImages($node, post.imageList || []);
+
+
+                    $node.find(".open-post-detail").on("click", function () {
+                        const targetPostId = $(this).data("post-id");
+
+                        if (!targetPostId) {
+                            return;
+                        }
+                        openPostDetailModal(targetPostId);
+                    });
+
+                    $postList.append($node);
+
+                });
+
+                $("#postSection").removeClass("hidden");
+
+
+                if (typeof lucide !== "undefined") {
+                    lucide.createIcons();
+                }
+
+                $postList.find(".post-swiper").each(function () {
+                    if (!this.swiper) {
+                        new Swiper(this, {
+                            loop: false,
+                            pagination: {
+                                el: $(this)
+                                    .find(".swiper-pagination")
+                                    .get(0),
+                                clickable: true
+                            }
+                        });
+                    }
+                });
+            }
+            function renderPostImages($node, imageList) {
+                const $swiper = $node.find(".post-swiper");
+                const $emptyImage = $node.find(".post-empty-image");
+                const $wrapper = $node.find(".post-swiper-wrapper");
+
+                if (!imageList || imageList.length === 0) {
+                    $swiper.addClass("hidden");
+                    $emptyImage.removeClass("hidden");
+                    return;
+                }
+
+                $swiper.removeClass("hidden");
+                $emptyImage.addClass("hidden");
+                $wrapper.empty();
+                imageList.forEach(function (image) {
+                    if (!image || !image.imagePath) {
+                        return;
+                    }
+
+                    const $slide = $(`
+        <div class="swiper-slide w-full h-full flex items-center justify-center flex-shrink-0">
+            <img
+        src="${image.imagePath}"
+        alt="post image"
+        class="w-full h-full object-cover block">
+            </div>
+                `);
+                    $wrapper.append($slide);
+                });
+            }
+            function formatPostDate(dateValue) {
+
+                if (!dateValue) {
+                    return "";
+                }
+
+                const date = new Date(dateValue);
+
+                if (Number.isNaN(date.getTime())) {
+                    return "";
+                }
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, "0");
+                const day =String(date.getDate()).padStart(2, "0");
+                return (year + "-" + month + "-" + day);
+            }
             function adjustVerticalLocationFontSize() {
                 const el = document.getElementById("verticalLocation");
 
@@ -191,85 +643,149 @@
                     el.style.fontSize = fontSize + "rem";
                 }
             }
-            function renderUsers(users) {
-                $userList.empty();
 
-                if (!users || users.length === 0) {
-                    $userSection.addClass('hidden');
-                    $('#noResults').removeClass('hidden');
+            function openPostDetailModal(postId) {
+                sessionStorage.setItem("openPostId", postId);
+
+                $.ajax({
+                    url: '/post/detail',
+                    type: 'GET',
+                    data: { postId: postId },
+                    dataType: 'html',
+
+                    success: function (html) {
+
+                        $('#postDetailModal').remove();
+
+                        $('body').append(html);
+
+                        const $modal = $('#postDetailModal');
+
+                        if (window.lucide) {
+                            lucide.createIcons();
+                        }
+                        adjustVerticalLocationFontSize($modal);
+                        if (window.Swiper) {
+                            new Swiper($modal.find('.modal-swiper')[0], {
+                                pagination: {
+                                    el: $modal.find('.swiper-pagination')[0],
+                                    clickable: true
+                                }
+                            });
+                        }
+
+                        $modal.modal('show');
+                        $modal.on('hidden.bs.modal', function () {
+                            $modal.remove();
+                        });
+
+                    },
+                    error: function () {
+                        alert('게시물을 불러오지 못했습니다.');
+                    }
+                });
+                $(document).on("hidden.bs.modal", "#postDetailModal", function () {
+                    sessionStorage.removeItem("openPostId");
+                });
+
+            }
+            $(document).on("click", ".like-btn", function(){
+
+                let postId = $(this).data("post-id");
+
+
+                $.ajax({
+                    type:"post"
+                    , url:"/post/like"
+                    , data:{"postId":postId}
+                    , success:function (response){
+                        if(response.result == "success"){
+                            location.reload();
+                        }else{
+                            alert("좋아요 실패");
+                        }
+                    },error: function (){
+                        alert("좋아요 에러");
+                    }
+                });
+
+            });
+            $(document).on("click", ".unlike-btn", function(){
+                let postId = $(this).data("post-id");
+
+                $.ajax({
+                    type:"DELETE"
+                    , url:"/post/unlike"
+                    , data:{"postId":postId}
+                    , success:function (response){
+                        if(response.result == "success"){
+                            location.reload();
+                        }else{
+                            alert("좋아요 취소 실패");
+                        }
+                    },error: function (){
+                        alert("좋아요 취소 에러");
+                    }
+                });
+            });
+            $(document).on("click", "#btnCommentSubmit", function () {
+                let postId = $("#modalPostId").val();
+                let comment = $("#commentInput").val();
+
+                if (!comment || comment.trim() === "") {
+                    alert("댓글을 입력하세요.");
                     return;
                 }
 
-                $('#noResults').addClass('hidden');
-
-                users.forEach((user) => {
-
-                    const $node = $($userItemTemplate.prop('content')).clone();
-
-                    $node.find('.user-profile-img').attr('src', user.profileImg);
-
-                    $node.find('.user-nickname').text(user.nickName);
-
-                    const $button = $node.find('.friend-request-btn');
-
-                    $button.attr('data-user-id', user.id);
-
-                    if (user.friend) {
-
-                        $button.remove();
-                        $node.find('.user-search-item').addClass('cursor-pointer');
-
-                        $node.find('.user-search-item').on('click', function () {
-                            location.href = '/friend/' + user.id;
-                        });
-
-                    }  else if (user.requestSent) {
-
-                        $button
-                            .text('요청 완료')
-                            .prop('disabled', true)
-                            .removeClass('btn-primary')
-                            .addClass('btn-secondary');
-                    }
-
-                    $userList.append($node);
-                });
-
-                $userSection.removeClass('hidden');
-
-                if (window.lucide) {
-                    lucide.createIcons();
-                }
-            }
-            $userList.on('click', '.friend-request-btn', function () {
-
-                let toUserId = $(this).data('user-id');
-                let $button = $(this);
-
                 $.ajax({
-                    url: '/friend/request',
-                    type: 'POST',
-                    data: {
-                        toUserId: toUserId
-                    },
+                    type: "post",
+                    url: "/comment/write",
+                    data: { postId: postId, comments: comment },
                     success: function (response) {
-                        if (response.result === 'success') {
-                            $button
-                                .text('요청 완료')
-                                .prop('disabled', true)
-                                .removeClass('btn-primary')
-                                .addClass('btn-secondary');
-
+                        if (response.result === "success") {
+                            location.reload();
                         } else {
-                            alert(response.message);
+                            alert("댓글 작성 실패!");
                         }
                     },
                     error: function () {
-                        alert('친구 요청에 실패했습니다.');
+                        alert("댓글 에러!");
+                    }
+                });
+            });
+            $(document).on("click", ".comment-delete-btn", function () {
+
+                const commentId = $(this).data("comment-id");
+
+                $.ajax({
+                    url: "/comment/remove",
+                    type: "DELETE",
+                    data: {commentId: commentId},
+                    success: function (response) {
+                        if (response.result === "success") {
+                            location.reload();
+                        } else {
+                            alert("댓글 삭제 실패");
+                        }
+                    }, error: function () {
+                        alert("댓글 삭제 에러");
                     }
                 });
             });
 
+            $(document).ready(function () {
+                const savedKeyword = sessionStorage.getItem("searchKeyword");
+                if (savedKeyword) {
+                    $searchInput.val(savedKeyword);
+                    $searchInput.trigger("input");
+                }
+
+                const savedPostId = sessionStorage.getItem("openPostId");
+
+                if (savedPostId) {
+                    openPostDetailModal(savedPostId);
+                }
+            });
         });
 
     </script>

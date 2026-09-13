@@ -111,7 +111,13 @@
 
                     <div class="ticket-img-wrap">
                         <img class="country-ticket-img">
+                        <button type="button"
+                                class="country-ticket-menu">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+
                     </div>
+
 
                     <div class="ticket-divider">
                         <div class="right-hole"></div>
@@ -134,7 +140,75 @@
                 </div>
 
             </div>
+
         </div>
+        <div id="WishListPanel" class="country-list-panel hidden">
+
+            <div class="wish-panel-header">
+                <div class="wish-panel-title">
+                    <i class="bi bi-heart-fill"></i>
+                    <span id="wishPanelName"></span>
+                </div>
+
+                <button type="button"
+                        id="wishPanelClose"
+                        class="country-panel-close">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+            <div id="wishTicketGrid" class="country-ticket-grid">
+
+                <div class="wish-ticket d-none">
+
+                    <div class="wish-ticket-header">
+                        <i class="bi bi-heart-fill wish-ticket-heart"></i>
+                        <div class="wish-ticket-city"></div>
+                        <button type="button" class="wish-ticket-menu">
+                            <i class="bi bi-three-dots-vertical"></i>
+                        </button>
+                    </div>
+
+                    <div class="ticket-divider">
+                        <div class="right-hole"></div>
+                        <div class="ticket-hole top"></div>
+                        <div class="ticket-hole bottom"></div>
+                    </div>
+
+                    <div class="wish-ticket-body">
+                        <div class="wish-ticket-row">
+                            <span class="wish-ticket-label mr-2">PERIOD</span>
+                            <span class="wish-ticket-count"></span>
+                        </div>
+                        <div class="wish-ticket-row">
+                            <span class="wish-ticket-label mr-2">DATE</span>
+                            <span class="wish-ticket-period"></span>
+                        </div>
+                        <div class="wish-ticket-memo"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="modal fade create-choice-modal" id="moreModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-body">
+
+                        <button type="button" class="btn-choice edit-post-btn d-none">게시물 수정</button>
+                        <button type="button" class="btn-choice delete-post-btn d-none">게시물 삭제</button>
+
+                        <button type="button" class="btn-choice edit-wishlist-btn d-none">위시리스트 수정</button>
+                        <button type="button" class="btn-choice delete-wishlist-btn d-none">위시리스트 삭제</button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
     <div th:replace="~{mypage/pofile :: profilePanel}"></div>
 
@@ -144,6 +218,99 @@
     <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
+
+        function  openWishPanel(countryCode){
+            if (!countryCode) {
+                alert("국가 코드 확인");
+                return;
+            }
+            const countryName = countryNameMap[countryCode] || countryCode;
+            $("#wishPanelName").text(countryName);
+
+            renderCountryTickets([]);
+
+            $("#countryListPanel").removeClass("show");
+
+            setTimeout(function () {
+                $("#countryListPanel").addClass("hidden");
+            }, 220);
+
+            setTimeout(function () {
+                $("#WishListPanel").removeClass("hidden");
+
+                setTimeout(function () {
+                    $("#WishListPanel").addClass("show");
+                }, 10);
+            }, 230);
+
+            $.ajax({
+                url: "/mypage/wishlist/tickets",
+                type: "GET",
+                data: {countryCode: countryCode},
+                dataType: "json",
+
+                success: function (response) {
+                    if (response.result == "success") {
+                        renderWishTickets(response.data);
+                    }else{
+                        alert("티켓 조회 실패");
+                        renderWishTickets([]);
+                    }
+                }, error: function () {
+                    alert(("티켓 조회 에러"));
+                    renderWishTickets([]);
+                }
+
+            });
+
+        }
+
+        function renderWishTickets(wishList) {
+
+            const $grid = $("#wishTicketGrid");
+            $grid.find(".wish-ticket.generated").remove();
+            const $template = $grid.find(".wish-ticket.d-none").first();
+            if ($template.length === 0) {
+                return;
+            }
+            $.each(wishList, function (index, wish) {
+
+                const $ticket = $template.clone();
+
+                $ticket.removeClass("d-none").addClass("generated");
+                $ticket.attr("data-wishlist-id", wish.id);
+                $ticket.find(".wish-ticket-city").text(wish.cityName);
+                $ticket.find(".wish-ticket-count").text(wish.period);
+                $ticket.find(".wish-ticket-period").text(
+                    (wish.startDate ? formatDate(wish.startDate) : "")
+                    + (wish.endDate ? " ~ " + formatDate(wish.endDate) : "")
+                );
+
+                $ticket.find(".wish-ticket-memo").text(wish.memo ? wish.memo : "메모 없음");
+
+                $grid.append($ticket);
+            });
+        }
+        $(document).on("click", ".wish-ticket-menu", function (event) {
+            event.stopPropagation();
+
+            const wishlistId = $(this).closest(".wish-ticket").data("wishlist-id");
+
+            if (!wishlistId) {
+                alert("위시리스트 번호가 없습니다.");
+                return;
+            }
+
+            $(".edit-post-btn").addClass("d-none").removeData("post-id");
+            $(".delete-post-btn").addClass("d-none").removeData("post-id");
+            $(".edit-wishlist-btn").addClass("d-none").removeData("wishlist-id");
+            $(".delete-wishlist-btn").addClass("d-none").removeData("wishlist-id");
+
+            $(".edit-wishlist-btn").removeClass("d-none").data("wishlist-id", wishlistId);
+            $(".delete-wishlist-btn").removeClass("d-none").data("wishlist-id", wishlistId);
+
+            $("#moreModal").modal("show");
+        });
         function openCountryPanel(countryCode) {
 
             if (!countryCode) {
@@ -153,14 +320,21 @@
             const countryName = countryNameMap[countryCode] || countryCode;
             $("#countryPanelName").text(countryName);
 
-            renderCountryTickets([]);
+            renderWishTickets([]);
 
-            $("#countryListPanel").removeClass("hidden");
+            $("#WishListPanel").removeClass("show");
 
             setTimeout(function () {
-                $("#countryListPanel").addClass("show");
-                }, 10);
+                $("#WishListPanel").addClass("hidden");
+            }, 220);
 
+            setTimeout(function () {
+                $("#countryListPanel").removeClass("hidden");
+
+                setTimeout(function () {
+                    $("#countryListPanel").addClass("show");
+                }, 10);
+            }, 230);
             $.ajax({
                 url: "/mypage/post/tickets",
                 type: "GET",
@@ -413,6 +587,21 @@
                         tooltipText: "❤️ {countryName} · {cityName}"
                     });
                     container.children.push(circle);
+
+                    container.events.on("click", function (event) {
+                        const dataItem = event.target.dataItem;
+                        if (!dataItem) {
+                            return;
+                        }
+                        const dataContext = dataItem.dataContext;
+
+                        const countryCode = dataContext.countryCode;
+                        if (!countryCode) {
+                            alert("게시물 데이터 없음");
+                            return;
+                        }
+                        openWishPanel(countryCode);
+                    });
                     return am5.Bullet.new(root, {
                         sprite: container
                     });
@@ -504,6 +693,32 @@
 
             openPostDetailModal(postId);
         });
+
+
+        $(document).on("click", ".country-ticket-menu", function (event) {
+
+            event.stopPropagation();
+
+            const postId = $(this).closest(".country-ticket").data("post-id");
+
+            if (!postId) {
+                alert("게시물 번호가 없습니다.");
+                return;
+            }
+
+            $(".edit-post-btn").addClass("d-none").removeData("post-id");
+
+            $(".delete-post-btn").addClass("d-none").removeData("post-id");
+
+            $(".edit-wishlist-btn").addClass("d-none").removeData("wishlist-id");
+
+            $(".delete-wishlist-btn").addClass("d-none").removeData("wishlist-id");
+
+            $(".edit-post-btn").removeClass("d-none").data("post-id", postId);
+            $(".delete-post-btn").removeClass("d-none").data("post-id", postId);
+
+            $("#moreModal").modal("show");
+        });
         function adjustVerticalLocationFontSize() {
             const el = document.getElementById("verticalLocation");
 
@@ -540,7 +755,7 @@
                     if (window.lucide) {
                         lucide.createIcons();
                     }
-                    adjustVerticalLocationFontSize($modal);
+                    adjustVerticalLocationFontSize();
                     if (window.Swiper) {
                         new Swiper($modal.find('.modal-swiper')[0], {
                             pagination: {
@@ -660,7 +875,99 @@
                 $("#countryListPanel").addClass("hidden");
             }, 220);
         });
+        $("#wishPanelClose").on("click", function () {
+            $("#WishListPanel").removeClass("show");
+            setTimeout(function () {
+                $("#WishListPanel").addClass("hidden");
+            }, 220);
+        });
+        $(document).on("click", ".edit-post-btn", function () {
+            let postId = $(this).data("post-id");
 
+            $("#moreModal").modal("hide");
+
+            $.ajax({
+                type: "GET",
+                url: "/post/modify-modal",
+                data: { postId: postId },
+                success: function (response) {
+                    $("#postModifyModal").remove();
+                    $("body").append(response);
+
+                    $("#modifyPostId").val(postId);
+                    $("#postModifyModal").modal("show");
+
+                    lucide.createIcons();
+                },
+                error: function () {
+                    alert("게시물 정보를 불러오는데 실패했습니다.");
+                }
+            });
+        });
+        $(".delete-post-btn").on("click",function (){
+            let postId = $(this).data("post-id");
+
+            $.ajax({
+                type:"delete"
+                ,url:"/post/remove"
+                ,data:{"postId":postId}
+                ,success: function (response){
+                    if(response.result =="success"){
+                        location.reload();
+                    }else {
+                        alert("게시물 삭제 실패");
+                    }
+                },error: function (){
+                    alert("게시물 삭제 에러");
+                }
+            });
+
+        });
+        $(document).on("click", ".edit-wishlist-btn", function () {
+            let wishlistId = $(this).data("wishlist-id");
+
+            $("#moreModal").modal("hide");
+
+            $.ajax({
+                type: "GET",
+                url: "/wishlist/modify-wishlist",
+                data: { wishlistId: wishlistId },
+                success: function (response) {
+                    $("#wishModifyModal").remove();
+                    $("body").append(response);
+
+                    $("#modifyWishId").val(wishlistId);
+                    $("#wishModifyModal").modal("show");
+
+                    lucide.createIcons();
+                },
+                error: function () {
+                    alert("위시리스트 정보를 불러오는데 실패했습니다.");
+                }
+            });
+        });
+
+
+        $(".delete-wishlist-btn").on("click",function (){
+            let wishlistId = $(this).data("wishlist-id");
+
+            $.ajax({
+                type:"delete"
+                ,url: "/wishlist/remove"
+                ,data:{"wishlistId":wishlistId}
+                ,success: function (response){
+                    if(response.result == "success"){
+                        location.reload();
+                    }else{
+                        alert("위시리스트 삭제 실패");
+                    }
+                },error:function (){
+                    alert("위시리스트 삭제 에러");
+                }
+
+            });
+
+        });
     </script>
 </div>
 
