@@ -106,6 +106,23 @@
         $('#wishPeriodModify').on('click', function () {
             alert('기간은 수정할 수 없습니다.');
         });
+        $("#wishStartDateModify").on("change", function () {
+
+            const startDate = $(this).val();
+            const $endDate = $('#wishEndDateModify');
+
+            if (!startDate) {
+                $endDate.removeAttr('min');
+                return;
+            }
+
+
+            $endDate.attr('min', startDate);
+
+            if (endDate && endDate < startDate) {
+                $endDate.val('');
+            }
+        });
         $('#wishModifySubmitBtn').on("click",function (){
             const wishId = $('#modifyWishId').val();
             const cityName = $('#wishCityNameModify').val();
